@@ -1,8 +1,8 @@
-from flask import jsonify
+from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.User import User, db
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flasgger import swag_from
 
 class Register(Resource):
@@ -83,13 +83,13 @@ class Login(Resource):
             200: {
                 'description': 'Login successful',
                 'examples': {
-                    'application/json': {'access_token': 'your_access_token_here'}
+                    'application/json': {'login': True}
                 }
             },
             401: {
                 'description': 'Invalid username or password',
                 'examples': {
-                    'application/json': {'msg': 'Invalid username or password'}
+                    'application/json': {'msg': 'Invalid username or password', 'login': False}
                 }
             }
         },
@@ -120,6 +120,27 @@ class Login(Resource):
         user = User.query.filter_by(Username=args['username']).first()
         if user and check_password_hash(user.Hashed_pass, args['password']):
             access_token = create_access_token(identity=args['username'])
-            return {"access_token": access_token}, 200
+            response = jsonify({'login': True})  # Create a JSON response
+            response = make_response(response)   # Convert to modifiable response
+            set_access_cookies(response, access_token)  # Set the JWT cookies
+            return response  # No need to serialize further
 
-        return {"msg": "Invalid username or password"}, 401
+        return jsonify({"msg": "Invalid username or password", 'login': False}), 401
+    
+class Logout(Resource):
+    @swag_from({
+        'responses': {
+            200: {
+                'description': 'Logout successful',
+                'examples': {
+                    'application/json': {'logout': True}
+                }
+            }
+        }
+    })
+    def post(self):
+        # Create a response indicating the user is logged out
+        response = jsonify({'logout': True})
+        # Unset the JWT cookies to log the user out
+        unset_jwt_cookies(response)
+        return response, 200
