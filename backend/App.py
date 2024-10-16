@@ -3,6 +3,9 @@ from flask import Flask
 from flask_restful import Api
 from models.User import db
 from controllers.auth_controller import Register, Login, Logout
+from models.Cat import db
+from controllers.cat_controller import CatList, CatById
+from controllers.species_controller import SpeciesList, SpeciesById
 from flasgger import Swagger
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -31,3 +34,9 @@ db.init_app(app)
 api.add_resource(Register, '/auth/register')
 api.add_resource(Login, '/auth/login')
 api.add_resource(Logout, '/auth/logout')
+
+api.add_resource(CatList, '/cats')
+api.add_resource(CatById, '/cats/<int:cat_id>')
+
+api.add_resource(SpeciesList, '/species')
+api.add_resource(SpeciesById, '/species/<int:species_id>')
