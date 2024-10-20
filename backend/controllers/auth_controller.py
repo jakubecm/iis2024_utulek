@@ -124,7 +124,7 @@ class Login(Resource):
 
         user = User.query.filter_by(Username=args['username']).first()
         if user and check_password_hash(user.Hashed_pass, args['password']):
-            access_token = create_access_token(identity=args['username'])
+            access_token = create_access_token(identity={"username": args['username'], "role": user.role, "user_id": user.UserId})
             response = jsonify({'login': True})  # Create a JSON response
             response = make_response(response)   # Convert to modifiable response
             set_access_cookies(response, access_token)  # Set the JWT cookies
