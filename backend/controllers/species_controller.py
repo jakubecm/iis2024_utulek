@@ -9,6 +9,7 @@ species_parser.add_argument('name', required=True, help="Name cannot be blank.")
 
 class SpeciesList(Resource):
     @swag_from({
+        'tags': ['Species'],
         'summary': 'Get all species',
         'responses': {
             200: {
@@ -37,6 +38,7 @@ class SpeciesList(Resource):
         return response
 
     @swag_from({
+        'tags': ['Species'],
         'summary': 'Create a new species',
         'responses': {
             201: {
@@ -80,6 +82,7 @@ class SpeciesList(Resource):
 
 class SpeciesById(Resource):
     @swag_from({
+        'tags': ['Species'],
         'summary': 'Get specific species by ID',
         'responses': {
             200: {
@@ -113,6 +116,7 @@ class SpeciesById(Resource):
         return {"id": species.Id, "name": species.Name}, 200
 
     @swag_from({
+        'tags': ['Species'],
         'summary': 'Delete a species',
         'responses': {
             200: {
@@ -138,7 +142,7 @@ class SpeciesById(Resource):
             }
         ]
     })
-    def delete(self, species_id): # Delete a species
+    def delete(self, species_id):
         species = Species.query.get(species_id)
         if not species:
             return {"msg": "Species not found"}, 404

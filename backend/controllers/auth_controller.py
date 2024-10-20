@@ -8,6 +8,8 @@ from models.database import db
 
 class Register(Resource):
     @swag_from({
+        'tags': ['Authentication'],
+        'summary': 'Register a new user',
         'responses': {
             201: {
                 'description': 'User created successfully',
@@ -80,6 +82,8 @@ class Register(Resource):
 
 class Login(Resource):
     @swag_from({
+        'tags': ['Authentication'],
+        'summary': 'Login to the system',
         'responses': {
             200: {
                 'description': 'Login successful',
@@ -130,6 +134,8 @@ class Login(Resource):
     
 class Logout(Resource):
     @swag_from({
+        'tags': ['Authentication'],
+        'summary': 'Logout from the system',
         'responses': {
             200: {
                 'description': 'Logout successful',

@@ -14,6 +14,7 @@ cat_parser.add_argument('found', help="Found date in format YYYY-MM-DD")
 
 class CatList(Resource):
     @swag_from({
+        'tags': ['Cats'],
         'summary': 'Get all cats',
         'responses': {
             200: {
@@ -48,6 +49,7 @@ class CatList(Resource):
         return jsonify(cats_list)
 
     @swag_from({
+        'tags': ['Cats'],
         'summary': 'Create a new cat',
         'responses': {
             201: {
@@ -98,6 +100,7 @@ class CatList(Resource):
 
 class CatById(Resource):
     @swag_from({
+        'tags': ['Cats'],
         'summary': 'Get specific cat by ID',
         'responses': {
             200: {
@@ -144,6 +147,7 @@ class CatById(Resource):
         })
 
     @swag_from({
+        'tags': ['Cats'],
         'summary': 'Update a specific cat by ID',
         'responses': {
             200: {
@@ -201,6 +205,7 @@ class CatById(Resource):
         return {"msg": "Cat updated successfully"}, 200
 
     @swag_from({
+        'tags': ['Cats'],
         'summary': 'Delete a specific cat by ID', 
         'responses': {
             200: {
