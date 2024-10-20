@@ -198,6 +198,7 @@ class ExaminationRequestById(Resource):
             return {'msg': 'Examination request not found'}, 404
         
     @swag_from({
+        'tags': ['Examination Requests'],
         'summary': 'Delete examination request',
         'parameters': [
             {
