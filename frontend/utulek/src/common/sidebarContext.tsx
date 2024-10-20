@@ -1,0 +1,127 @@
+import React, { createContext, useContext, ReactNode } from 'react';
+import {
+  PresentationChartBarIcon,
+  ShoppingBagIcon,
+  UserCircleIcon,
+  Cog6ToothIcon,
+  InboxIcon,
+  PowerIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/solid";
+
+// Define the shape of a sidebar item with optional children for dropdowns
+interface SidebarItem {
+  label: string;
+  icon: React.ReactNode;
+  route?: string;  // route is optional for items that have children
+  children?: SidebarItem[];  // Nested sub-items for dropdowns
+}
+
+interface SidebarContextType {
+  items: SidebarItem[];
+}
+
+// Create the context
+const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+
+// Create a provider component
+export const SidebarProvider: React.FC<{ role: 'user' | 'admin' | 'unauthenticated', children: ReactNode }> = ({ role, children }) => {
+  
+  // Define user-specific sidebar data
+  const userSidebarData: SidebarItem[] = [
+    {
+      label: 'Home',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/',
+    },
+    {
+      label: 'Macicky',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/inbox',
+    },
+    {
+      label: 'Settings',
+      icon: <Cog6ToothIcon className="h-5 w-5" />,
+      route: '/settings',
+    },
+    {
+      label: 'Profile',
+      icon: <UserCircleIcon className="h-5 w-5" />,
+      route: '/profile',
+    },
+    {
+      label: 'Log Out',
+      icon: <PowerIcon className="h-5 w-5" />,
+      route: '/logout',
+    },
+  ];
+
+  const sidebarUnauthData: SidebarItem[] = [
+    {
+      label: 'Home',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/',
+    },
+    {
+      label: 'Macicky',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/inbox',
+    },
+    {
+      label: 'Settings',
+      icon: <Cog6ToothIcon className="h-5 w-5" />,
+      route: '/settings',
+    },
+    {
+      label: 'Login',
+      icon: <UserCircleIcon className="h-5 w-5" />,
+      route: '/login',
+    },
+  ];
+
+  // Define admin-specific sidebar data
+  const adminSidebarData: SidebarItem[] = [
+    {
+      label: 'Dashboard',
+      icon: <PresentationChartBarIcon className="h-5 w-5" />,
+      route: '/admin/dashboard',
+    },
+    {
+      label: 'Fentanyl',
+      icon: <ShoppingBagIcon className="h-5 w-5" />,
+      children: [
+        { label: 'Orders', route: '/admin/ecommerce/orders', icon: <ChevronRightIcon strokeWidth={3} className="h-3 w-5" /> },
+        { label: 'Products', route: '/admin/ecommerce/products', icon: <ChevronRightIcon strokeWidth={3} className="h-3 w-5" /> },
+      ],
+    },
+  ];
+
+  // Select data based on role
+  const sidebarData = React.useMemo(() => {
+    switch (role) {
+      case 'admin':
+        return [...adminSidebarData, ...userSidebarData];
+      case 'user':
+        return userSidebarData;
+      case 'unauthenticated':
+        return sidebarUnauthData;
+      default:
+        return [];
+    }
+  }, [role]);
+
+  return (
+    <SidebarContext.Provider value={{ items: sidebarData }}>
+      {children}
+    </SidebarContext.Provider>
+  );
+};
+
+// Custom hook to use the sidebar context
+export const useSidebar = () => {
+  const context = useContext(SidebarContext);
+  if (!context) {
+    throw new Error('useSidebar must be used within a SidebarProvider');
+  }
+  return context;
+};

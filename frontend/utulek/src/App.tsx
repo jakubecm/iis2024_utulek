@@ -1,51 +1,43 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import Home from './common/home';
+import Sidebar from './components/sidebar';
+import { SidebarProvider } from './common/sidebarContext';
+import Login from './common/login';
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    // Fetch the user's role from backend or get it from login response
-    fetch('http://127.0.0.1:5000/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({
-        "password": "string",
-        "username": "string"
-      }),
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include'  // Include cookies in the request
-    }).then(response => {
-      console.log(response);
-      console.log(response.json());
-    });
-  }, []);
+  // useEffect(() => {
+  //   // Fetch the user's role from backend or get it from login response
+  //   fetch('http://127.0.0.1:5000/auth/login', {
+  //     method: 'POST',
+  //     body: JSON.stringify({
+  //       "password": "string",
+  //       "username": "string"
+  //     }),
+  //     headers: { 'Content-Type': 'application/json' },
+  //     credentials: 'include'  // Include cookies in the request
+  //   }).then(response => {
+  //     console.log(response);
+  //     console.log(response.json());
+  //   });
+  // }, []);
+  const user_role = 'unauthenticated';  // Hardcoded for now
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <SidebarProvider role={user_role}>
+      <Router>
+        <div className="flex h-screen">
+          <Sidebar />
+          <div className="flex-1 p-4">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+            </Routes>
+          </div>
+        </div>
+      </Router>
+    </SidebarProvider>
+  );
 }
 
-export default App
+export default App;
