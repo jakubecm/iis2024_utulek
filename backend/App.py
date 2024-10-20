@@ -14,10 +14,10 @@ from controllers.examination_controller import ExaminationRequestList, Examinati
 # Model imports
 from models.User import db
 from models.Cat import db
+from models.ExaminationRequest import db
 
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins="http://localhost:5173")
 app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://utulekAdmin:smisek123@localhost/utulek'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -28,6 +28,7 @@ app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Store JWT in cookies
 app.config['JWT_COOKIE_SECURE'] = True  # Only send cookie over HTTPS
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True  # Enable CSRF protection
+CORS(app, supports_credentials=True, origins="http://localhost:5173")
 
 api = Api(app)
 swagger = Swagger(app)
