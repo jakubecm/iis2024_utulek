@@ -11,10 +11,8 @@ from controllers.cat_controller import CatList, CatById
 from controllers.species_controller import SpeciesList, SpeciesById
 from controllers.examination_controller import ExaminationRequestList, ExaminationRequestById
 
-# Model imports
-from models.User import db
-from models.Cat import db
-from models.ExaminationRequest import db
+# DB import
+from models.database import db
 
 
 app = Flask(__name__)

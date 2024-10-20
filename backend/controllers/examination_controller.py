@@ -2,7 +2,8 @@ import datetime
 from flasgger import swag_from
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
-from models.ExaminationRequest import ExaminationRequest, db
+from models.ExaminationRequest import ExaminationRequest
+from models.database import db
 
 examination_request_parser = reqparse.RequestParser()
 examination_request_parser.add_argument('cat_id', required=True, help="Cat ID cannot be blank.")

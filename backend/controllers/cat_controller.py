@@ -1,7 +1,8 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 from flasgger import swag_from
-from models.Cat import Cats, db
+from models.Cat import Cats
+from models.database import db
 
 # Parser for Cat endpoints
 cat_parser = reqparse.RequestParser()

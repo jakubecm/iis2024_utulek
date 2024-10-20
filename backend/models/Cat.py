@@ -1,6 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from models.database import db
 
 class Species(db.Model):
     __tablename__ = 'species'

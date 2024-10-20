@@ -1,9 +1,10 @@
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.User import User, db
+from models.User import User
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from flasgger import swag_from
+from models.database import db
 
 class Register(Resource):
     @swag_from({

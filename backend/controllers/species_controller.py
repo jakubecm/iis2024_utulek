@@ -1,7 +1,8 @@
 from flasgger import swag_from
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
-from models.Cat import Species, db
+from models.Cat import Species
+from models.database import db
 
 species_parser = reqparse.RequestParser()
 species_parser.add_argument('name', required=True, help="Name cannot be blank.")
