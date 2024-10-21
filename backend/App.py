@@ -10,6 +10,9 @@ from controllers.auth_controller import Register, Login, Logout
 from controllers.cat_controller import CatList, CatById
 from controllers.species_controller import SpeciesList, SpeciesById
 from controllers.examination_controller import ExaminationRequestList, ExaminationRequestById
+from controllers.healthrec_controller import HealthRecordList,  HealthRecordById
+from controllers.availableslot_controller import AvailableSlotList, AvailableSlotById
+from controllers.reservationrequest_controller import ReservationList, ReservationById
 
 # DB import
 from models.database import db
@@ -51,3 +54,12 @@ api.add_resource(SpeciesById, '/species/<int:species_id>')
 
 api.add_resource(ExaminationRequestList, '/examinationrequests')
 api.add_resource(ExaminationRequestById, '/examinationrequests/<int:examination_request_id>')
+
+api.add_resource(HealthRecordList, '/healthrecords/<int:cat_id>')
+api.add_resource(HealthRecordById, '/healthrecord/<int:health_record_id>')
+
+api.add_resource(AvailableSlotList, '/availableslots')
+api.add_resource(AvailableSlotById, '/availableslots/<int:slot_id>')
+
+api.add_resource(ReservationList, '/reservationrequests')
+api.add_resource(ReservationById, '/reservationrequests/<int:reservation_request_id>')
