@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import {
   PresentationChartBarIcon,
   ShoppingBagIcon,
@@ -8,6 +8,9 @@ import {
   PowerIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/solid";
+import { jwtDecode } from 'jwt-decode';
+import { DecodedJWT, Role } from '../auth/jwt';
+import { useAuth } from '../auth/AuthContext';
 
 // Define the shape of a sidebar item with optional children for dropdowns
 interface SidebarItem {
@@ -25,7 +28,9 @@ interface SidebarContextType {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 // Create a provider component
-export const SidebarProvider: React.FC<{ role: 'user' | 'admin' | 'unauthenticated', children: ReactNode }> = ({ role, children }) => {
+export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { role } = useAuth();
+  console.log("role:", role);
   
   // Define user-specific sidebar data
   const userSidebarData: SidebarItem[] = [
@@ -99,14 +104,12 @@ export const SidebarProvider: React.FC<{ role: 'user' | 'admin' | 'unauthenticat
   // Select data based on role
   const sidebarData = React.useMemo(() => {
     switch (role) {
-      case 'admin':
+      case Role.ADMIN:
         return [...adminSidebarData, ...userSidebarData];
-      case 'user':
+      case Role.USER:
         return userSidebarData;
-      case 'unauthenticated':
-        return sidebarUnauthData;
       default:
-        return [];
+        return sidebarUnauthData;
     }
   }, [role]);
 

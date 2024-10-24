@@ -6,7 +6,7 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
 # Controller imports
-from controllers.auth_controller import Register, Login, Logout
+from controllers.auth_controller import Register, Login, Logout, GetUserRole
 from controllers.cat_controller import CatList, CatById
 from controllers.species_controller import SpeciesList, SpeciesById
 from controllers.examination_controller import ExaminationRequestList, ExaminationRequestById
@@ -29,6 +29,7 @@ app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Store JWT in cookies
 app.config['JWT_COOKIE_SECURE'] = True  # Only send cookie over HTTPS
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True  # Enable CSRF protection
+app.config['JWT_COOKIE_SAMESITE'] = 'None'
 CORS(app, supports_credentials=True, origins="http://localhost:5173")
 
 api = Api(app)
@@ -45,6 +46,7 @@ def home():
 api.add_resource(Register, '/auth/register')
 api.add_resource(Login, '/auth/login')
 api.add_resource(Logout, '/auth/logout')
+api.add_resource(GetUserRole, '/auth/role')
 
 api.add_resource(CatList, '/cats')
 api.add_resource(CatById, '/cats/<int:cat_id>')

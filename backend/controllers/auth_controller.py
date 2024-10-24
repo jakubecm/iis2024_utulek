@@ -2,7 +2,7 @@ from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.User import User
-from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, jwt_required, get_jwt_identity
 from flasgger import swag_from
 from models.database import db
 
@@ -124,7 +124,7 @@ class Login(Resource):
 
         user = User.query.filter_by(Username=args['username']).first()
         if user and check_password_hash(user.Hashed_pass, args['password']):
-            access_token = create_access_token(identity={"username": args['username'], "role": user.role, "user_id": user.UserId})
+            access_token = create_access_token(identity={"username": args['username'], "role": user.role, "user_id": user.Id})
             response = jsonify({'login': True})  # Create a JSON response
             response = make_response(response)   # Convert to modifiable response
             set_access_cookies(response, access_token)  # Set the JWT cookies
@@ -148,6 +148,28 @@ class Logout(Resource):
     def post(self):
         # Create a response indicating the user is logged out
         response = jsonify({'logout': True})
+        response = make_response(response)
         # Unset the JWT cookies to log the user out
         unset_jwt_cookies(response)
-        return response, 200
+        return response
+    
+class GetUserRole(Resource):
+    @swag_from({
+        'tags': ['Authentication'],
+        'summary': 'Get the current user\'s role',
+        'responses': {
+            200: {
+                'description': 'User role retrieved',
+                'examples': {
+                    'application/json': {'role': 'admin'}
+                }
+            },
+        }
+    })
+    @jwt_required(optional=True)  # Requires the JWT token to be present in the HttpOnly cookie
+    def get(self):
+        current_user = get_jwt_identity()  # Get the identity from the JWT token
+        if current_user:
+            return jsonify({"role": current_user['role']})
+        else:
+            return jsonify({"role": -1})
