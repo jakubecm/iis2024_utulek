@@ -17,7 +17,7 @@ class Cats(db.Model):
     Found = db.Column(db.Date, nullable=False)
 
 class CatPhotos(db.Model):
-    __tablename__ = 'catPhotos'
+    __tablename__ = 'catphotos'
     __table_args__ = {'schema': 'utulek'}
     Id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     CatId = db.Column(db.BigInteger, db.ForeignKey('utulek.cats.Id'), primary_key=True)
