@@ -3,6 +3,7 @@ from flask_restful import Resource, reqparse
 from flasgger import swag_from
 from models.Cat import Cats
 from models.database import db
+from models.Cat import CatPhotos
 
 # Parser for Cat endpoints
 cat_parser = reqparse.RequestParser()
@@ -24,10 +25,12 @@ class CatList(Resource):
                         {
                             'id': 1, 
                             'name': 'Whiskers', 
-                            'species_id': 1, 'age': 5, 
+                            'species_id': 1, 
+                            'age': 5, 
                             'description': 'A playful cat', 
-                            'found': '2024-01-01'
-                            }
+                            'found': '2024-01-01',
+                            'photos': ['path/to/photo1.jpg', 'path/to/photo2.jpg']
+                        }
                     ]
                 }
             }
@@ -42,7 +45,8 @@ class CatList(Resource):
                 'species_id': cat.SpeciesId,
                 'age': cat.Age,
                 'description': cat.Description,
-                'found': cat.Found
+                'found': cat.Found,
+                'photos': [photo.PhotoUrl for photo in CatPhotos.query.filter_by(CatId=cat.Id).all()]
             } 
             for cat in cats
         ]
@@ -96,7 +100,11 @@ class CatList(Resource):
         )
         db.session.add(new_cat)
         db.session.commit()
-        return {"msg": "Cat created successfully"}, 201
+        response_data = {
+            'msg': 'Cat created successfully',
+            'id': new_cat.Id
+        }
+        return response_data, 201
 
 class CatById(Resource):
     @swag_from({
@@ -133,17 +141,23 @@ class CatById(Resource):
             }
         ]
     })
-    def get(self, cat_id): # Get a cat by ID
+    def get(self, cat_id):  # Get a cat by ID
         cat = Cats.query.get(cat_id)
         if not cat:
             return {"msg": "Cat not found"}, 404
+
+        # Fetch photos associated with the cat
+        photos = CatPhotos.query.filter_by(CatId=cat_id).all()
+        photo_urls = [photo.PhotoUrl for photo in photos]
+
         return jsonify({
             'id': cat.Id,
             'name': cat.Name,
             'species_id': cat.SpeciesId,
             'age': cat.Age,
             'description': cat.Description,
-            'found': cat.Found
+            'found': cat.Found,
+            'photos': photo_urls
         })
 
     @swag_from({
@@ -231,11 +245,16 @@ class CatById(Resource):
             }
         ]
     })
-    def delete(self, cat_id): # Delete a cat by ID
+    def delete(self, cat_id):
         cat = Cats.query.get(cat_id)
         if not cat:
             return {"msg": "Cat not found"}, 404
 
+        # Delete all photos related to this cat
+        CatPhotos.query.filter_by(CatId=cat_id).delete()
+
+        # Delete the cat itself
         db.session.delete(cat)
         db.session.commit()
-        return {"msg": "Cat deleted successfully"}, 200
+
+        return {"msg": "Cat and associated photos deleted successfully"}, 200

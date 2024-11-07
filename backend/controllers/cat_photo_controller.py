@@ -4,6 +4,7 @@ from flask_restful import Resource, reqparse
 from flasgger import swag_from
 from models.Cat import CatPhotos, Cats
 from models.database import db
+import time
 
 # Upload folder setup
 UPLOAD_FOLDER = './catphotos/'
@@ -53,27 +54,48 @@ class CatPhotoUpload(Resource):
         }
     })
     def post(self):
-        # Directly access form data from the request
+        # Access form data from the request
         cat_id = request.form.get('cat_id')
         file = request.files.get('file')
-        
+
         # Check if both file and cat_id are present
         if not file or not cat_id:
+            print("File or cat_id is missing in the request")
             return {"msg": "File and cat_id are required"}, 400
-        
+
+        # Cast cat_id to int if necessary
+        try:
+            cat_id = int(cat_id)
+            
+        except ValueError:
+            print(f"Invalid cat_id: {cat_id}")
+            return {"msg": "Invalid cat_id"}, 400
+
+        # Check if the cat exists
         cat = Cats.query.get(cat_id)
         if not cat:
+            print(f"Cat with id {cat_id} not found")
             return {"msg": "Cat not found"}, 404
 
-        # Save the file
-        filename = file.filename
+        # Save the file with a unique filename
+        filename = f"{cat_id}_{int(time.time())}_{file.filename}"
         filepath = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(filepath)
+        
+        try:
+            file.save(filepath)
+            print(f"File saved to {filepath}")
+        except Exception as e:
+            print(f"Error saving file: {e}")
+            return {"msg": "File could not be saved"}, 500
 
         # Add a new photo entry in the CatPhotos table
-        new_photo = CatPhotos(CatId=cat_id, PhotoUrl=filepath)
-        db.session.add(new_photo)
-        db.session.commit()
+        try:
+            new_photo = CatPhotos(CatId=cat_id, PhotoUrl=filepath)
+            db.session.add(new_photo)
+            db.session.commit()
+
+        except Exception as e:
+            return {"msg": "Failed to save photo to database"}, 500
 
         return {"msg": "Photo uploaded successfully", "path": filepath}, 200
 
@@ -179,3 +201,8 @@ class CatPhotoRetrieve(Resource):
             } for photo in photos
         ]
         return photo_list, 200
+    
+class CatPhotoServe(Resource):
+    def get(self, filename):
+        print(f"Serving photo: {filename}")
+        return send_from_directory('./catphotos', filename)
