@@ -19,13 +19,15 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
     
 class Veterinarian(db.Model):
-    __tablename__ = 'Vets'
-    UserId = db.Column(db.BigInteger, db.ForeignKey('Users.Id'), primary_key=True)
+    __tablename__ = 'vets'
+    __table_args__ = {'schema': 'utulek'}
+    UserId = db.Column(db.BigInteger, db.ForeignKey('utulek.users.Id'), primary_key=True)
     Specialization = db.Column(db.String(30), nullable=False)
     Telephone = db.Column(db.String(20), nullable=False)
 
 class Volunteer(db.Model):
-    __tablename__ = 'Volunteers'
-    UserId = db.Column(db.BigInteger, db.ForeignKey('Users.Id'), primary_key=True)
+    __tablename__ = 'volunteers'
+    __table_args__ = {'schema': 'utulek'}
+    UserId = db.Column(db.BigInteger, db.ForeignKey('utulek.users.Id'), primary_key=True)
     verified = db.Column(db.Boolean, nullable=False, default=False)
 
