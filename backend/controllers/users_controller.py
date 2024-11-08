@@ -2,7 +2,7 @@ from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash
 from flasgger import swag_from
-from models.User import User
+from models.User import User, Veterinarian, Volunteer
 from models.database import db
 
 class UserManagement(Resource):
@@ -122,3 +122,80 @@ class UserManagement(Resource):
         db.session.delete(user)
         db.session.commit()
         return {"msg": "User deleted successfully"}, 200
+
+class UserList(Resource):
+    @swag_from({
+        'tags': ['Admin'],
+        'summary': 'Retrieve all users (Admin only)',
+        'responses': {
+            200: {
+                'description': 'List of all users retrieved successfully',
+                'examples': {
+                    'application/json': [
+                        {
+                            'Id': 1,
+                            'Username': 'johndoe',
+                            'FirstName': 'John',
+                            'LastName': 'Doe',
+                            'Email': 'johndoe@example.com',
+                            'role': 1,
+                            'Veterinarian': {'Specialization': 'Surgery', 'Telephone': '123-456-7890'},
+                            'Volunteer': {'verified': True}
+                        },
+                        {
+                            'Id': 2,
+                            'Username': 'janedoe',
+                            'FirstName': 'Jane',
+                            'LastName': 'Doe',
+                            'Email': 'janedoe@example.com',
+                            'role': 2,
+                        }
+                    ]
+                }
+            },
+            403: {
+                'description': 'Admin access required',
+                'examples': {
+                    'application/json': {'msg': 'Admin access required'}
+                }
+            }
+        }
+    })
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        if current_user['role'] != 0:
+            return {"msg": "Admin access required"}, 403
+
+        # Retrieve all users
+        users = User.query.all()
+        users_data = []
+
+        for user in users:
+            user_data = {
+                "Id": user.Id,
+                "Username": user.Username,
+                "FirstName": user.FirstName,
+                "LastName": user.LastName,
+                "Email": user.Email,
+                "role": user.role,
+            }
+
+            # Check if the user is a veterinarian
+            veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
+            if veterinarian:
+                user_data["Veterinarian"] = {
+                    "Specialization": veterinarian.Specialization,
+                    "Telephone": veterinarian.Telephone
+                }
+
+            # Check if the user is a volunteer
+            volunteer = Volunteer.query.filter_by(UserId=user.Id).first()
+            if volunteer:
+                user_data["Volunteer"] = {
+                    "verified": volunteer.verified
+                }
+
+            users_data.append(user_data)
+
+        return users_data, 200

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import {
   PresentationChartBarIcon,
   ShoppingBagIcon,
@@ -8,8 +8,7 @@ import {
   PowerIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/solid";
-import { jwtDecode } from 'jwt-decode';
-import { DecodedJWT, Role } from '../auth/jwt';
+import { Role } from '../auth/jwt';
 import { useAuth } from '../auth/AuthContext';
 
 // Define the shape of a sidebar item with optional children for dropdowns
@@ -90,6 +89,11 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       label: 'Dashboard',
       icon: <PresentationChartBarIcon className="h-5 w-5" />,
       route: '/admin/dashboard',
+    },
+    {
+      label: 'Users',
+      icon: <UserCircleIcon className="h-5 w-5" />,
+      route: '/admin/users',
     },
     {
       label: 'Fentanyl',
