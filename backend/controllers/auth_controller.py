@@ -2,9 +2,10 @@ from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.User import User
-from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, jwt_required, get_jwt_identity, get_jwt
 from flasgger import swag_from
 from models.database import db
+from datetime import timedelta
 
 class Register(Resource):
     @swag_from({
@@ -88,7 +89,7 @@ class Login(Resource):
             200: {
                 'description': 'Login successful',
                 'examples': {
-                    'application/json': {'login': True}
+                    'application/json': {'login': True, 'expires_in': 900}  # Example expiration in seconds
                 }
             },
             401: {
@@ -124,11 +125,16 @@ class Login(Resource):
 
         user = User.query.filter_by(Username=args['username']).first()
         if user and check_password_hash(user.Hashed_pass, args['password']):
-            access_token = create_access_token(identity={"username": args['username'], "role": user.role, "user_id": user.Id})
-            response = jsonify({'login': True})  # Create a JSON response
-            response = make_response(response)   # Convert to modifiable response
-            set_access_cookies(response, access_token)  # Set the JWT cookies
-            return response  # No need to serialize further
+            # Set expiration time for the access token
+            expires = timedelta(minutes=45)  # Set token to expire in 15 minutes (example)
+            access_token = create_access_token(
+                identity={"username": args['username'], "role": user.role, "user_id": user.Id},
+                expires_delta=expires
+            )
+            response = jsonify({'login': True, 'expires_in': expires.total_seconds()})  # Include expiration in seconds
+            response = make_response(response)
+            set_access_cookies(response, access_token)
+            return response
 
         return jsonify({"msg": "Invalid username or password", 'login': False}), 401
     
@@ -170,6 +176,8 @@ class GetUserRole(Resource):
     def get(self):
         current_user = get_jwt_identity()  # Get the identity from the JWT token
         if current_user:
-            return jsonify({"role": current_user['role']})
+            # Get the expiration time (exp) from the JWT
+            expires_at = get_jwt()["exp"]  # exp is the expiration time in seconds since epoch
+            return jsonify({"role": current_user['role'], "expires_at": expires_at})
         else:
             return jsonify({"role": -1})

@@ -1,7 +1,6 @@
-import { jwtDecode } from "jwt-decode";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { DecodedJWT } from "./jwt";
 import { API_URL } from "../App";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   role: number | null;
@@ -18,6 +17,9 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true); // New loading state
+  const navigate = useNavigate();
+
 
   const fetchUserRole = async () => {
     try {
@@ -28,30 +30,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (response.ok) {
         const data = await response.json();
-        setRole(data.role);  // Set the role in state
+        if (data.expires_at) {
+          setLogoutTimeout(data.expires_at);  // Set the logout timeout
+        }
+
+        setRole(data.role);  // Set the user role
       } else {
         setRole(null);  // If not authenticated, set role to null
       }
     } catch (error) {
       console.error("Error fetching user role:", error);
       setRole(null);  // Clear role on error
+    } finally {
+      setLoading(false); // Indicate loading is complete
     }
-
-    console.log("role:", role);
   };
 
-  // Function to manually refresh the auth context (can be used after login)
+  const setLogoutTimeout = (expiresAt: number) => {
+    const expirationTime = expiresAt * 1000; // convert to milliseconds
+    const timeUntilExpiration = expirationTime - Date.now();
+
+    if (timeUntilExpiration > 0) {
+      setTimeout(() => navigate("/logout"), timeUntilExpiration);
+    }
+  };
+
+
   const refreshAuth = () => {
-    fetchUserRole();  // Fetch the user's role and update the context
+    setLoading(true); // Reset loading state when refreshing
+    fetchUserRole();
   };
 
-  // On initial load, refresh the auth context
   useEffect(() => {
     refreshAuth();
   }, []);
 
+  const isAuthenticated = role != null && role != -1;  // Check if the user is authenticated
+
+  const contextValue = React.useMemo(() => ({ role, isAuthenticated, refreshAuth }), [role, isAuthenticated]);
+
+  if (loading) return null; // Wait until loading is done before rendering children
+  // console.log("isAuthenticated:", isAuthenticated);
+  // console.log("role:", role);
+
+
   return (
-    <AuthContext.Provider value={{ role, isAuthenticated: !!role, refreshAuth }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
