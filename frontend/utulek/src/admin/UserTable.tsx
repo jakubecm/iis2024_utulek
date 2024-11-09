@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
  
 const TABLE_HEAD = ["Role", "Username", "Full Name", "Email", "Telephone", "Specialization", "Verified", ""];
 
-interface User {
+export interface User {
   Username: string;
   FirstName: string;
   LastName: string;
@@ -20,34 +20,11 @@ interface User {
 //        Misto N/A pomlcky vycentrovane
 //        Edit tlacitko by melo neco delat (optional) (:kapp:)
 //        Sloupce by mely fitnout content
-const UserTable: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+interface UserTableProps {
+  users: User[];
+}
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`${API_URL}/admin/users`, {
-        method: "GET",
-        credentials: "include",  // Include cookies for authentication
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-  
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
-      }
-  
-      const data = await response.json();
-      console.log(data);
-      setUsers(data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      throw error;
-    }
-  };
-
-  useMemo(() => { fetchUsers(); }, []);
-
+const UserTable: React.FC<UserTableProps> = ({ users }) => {
   return (
     <Card className="h-full w-full overflow-scroll">
       <table className="w-full min-w-max table-auto text-left">

@@ -5,77 +5,7 @@ from flasgger import swag_from
 from models.User import User, Veterinarian, Volunteer
 from models.database import db
 
-class UserManagement(Resource):
-    @swag_from({
-        'tags': ['Admin'],
-        'summary': 'Create a new user (Admin only)',
-        'responses': {
-            201: {
-                'description': 'User created successfully',
-                'examples': {
-                    'application/json': {'msg': 'User created successfully'}
-                }
-            },
-            409: {
-                'description': 'Username already exists',
-                'examples': {
-                    'application/json': {'msg': 'Username already exists'}
-                }
-            },
-            403: {
-                'description': 'Admin access required',
-                'examples': {
-                    'application/json': {'msg': 'Admin access required'}
-                }
-            }
-        },
-        'parameters': [
-            {
-                'name': 'body',
-                'in': 'body',
-                'required': True,
-                'schema': {
-                    'type': 'object',
-                    'properties': {
-                        'username': {'type': 'string'},
-                        'email': {'type': 'string'},
-                        'password': {'type': 'string'},
-                        'role': {'type': 'integer', 'default': 1}
-                    },
-                    'required': ['username', 'email', 'password']
-                },
-                'description': 'JSON object with username, email, password, and optional role'
-            }
-        ]
-    })
-    @jwt_required()
-    def post(self):
-        current_user = get_jwt_identity()
-        if current_user['role'] != 0:
-            return {"msg": "Admin access required"}, 403
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('username', required=True, help="Username cannot be blank.")
-        parser.add_argument('email', required=True, help="Email cannot be blank.")
-        parser.add_argument('password', required=True, help="Password cannot be blank.")
-        parser.add_argument('role', type=int, default=1, help="Role cannot be blank.")  # default role is 1 for non-admin users
-        args = parser.parse_args()
-
-        if User.query.filter_by(Username=args['username']).first():
-            return {"msg": "Username already exists"}, 409
-
-        hashed_password = generate_password_hash(args['password'])
-        new_user = User(
-            Username=args['username'],
-            Email=args['email'],
-            Hashed_pass=hashed_password,
-            role=args['role']
-        )
-        db.session.add(new_user)
-        db.session.commit()
-
-        return {"msg": "User created successfully"}, 201
-
+class UserById(Resource):
     @swag_from({
         'tags': ['Admin'],
         'summary': 'Delete a user by ID (Admin only)',
@@ -122,6 +52,96 @@ class UserManagement(Resource):
         db.session.delete(user)
         db.session.commit()
         return {"msg": "User deleted successfully"}, 200
+    
+    @swag_from({
+        'tags': ['Admin'],
+        'summary': 'Edit a user by ID (Admin only)',
+        'responses': {
+            200: {
+                'description': 'User updated successfully',
+                'examples': {
+                    'application/json': {'msg': 'User updated successfully'}
+                }
+            },
+            404: {
+                'description': 'User not found',
+                'examples': {
+                    'application/json': {'msg': 'User not found'}
+                }
+            },
+            403: {
+                'description': 'Admin access required',
+                'examples': {
+                    'application/json': {'msg': 'Admin access required'}
+                }
+            }
+        },
+        'parameters': [
+            {
+                'name': 'user_id',
+                'in': 'path',
+                'required': True,
+                'type': 'integer',
+                'description': 'ID of the user to edit'
+            }
+        ]
+    })
+    @jwt_required()
+    def put(self, user_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] != 0:
+            return {"msg": "Admin access required"}, 403
+
+        user = User.query.get(user_id)
+        if not user:
+            return {"msg": "User not found"}, 404
+
+        # Parse input data
+        parser = reqparse.RequestParser()
+        parser.add_argument('Username', type=str, required=False)
+        parser.add_argument('FirstName', type=str, required=False)
+        parser.add_argument('LastName', type=str, required=False)
+        parser.add_argument('Email', type=str, required=False)
+        parser.add_argument('role', type=int, required=False)
+        parser.add_argument('Specialization', type=str, required=False)
+        parser.add_argument('Telephone', type=str, required=False)
+        parser.add_argument('verified', type=bool, required=False)
+        args = parser.parse_args()
+
+        # Update user fields if provided
+        if args['Username']:
+            user.Username = args['Username']
+        if args['FirstName']:
+            user.FirstName = args['FirstName']
+        if args['LastName']:
+            user.LastName = args['LastName']
+        if args['Email']:
+            user.Email = args['Email']
+        if args['role'] is not None:
+            user.role = args['role']
+        if user.role == 2:  # Update veterinarian-specific fields if the user is a vet
+            if args['Specialization']:
+                veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
+                if not veterinarian:
+                    veterinarian = Veterinarian(UserId=user.Id)  # Create entry if not exists
+                    db.session.add(veterinarian)
+                veterinarian.Specialization = args['Specialization']
+            if args['Telephone']:
+                veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
+                if not veterinarian:
+                    veterinarian = Veterinarian(UserId=user.Id)
+                    db.session.add(veterinarian)
+                veterinarian.Telephone = args['Telephone']
+            if args['verified'] is not None:
+                volunteer = Volunteer.query.filter_by(UserId=user.Id).first()
+                if not volunteer:
+                    volunteer = Volunteer(UserId=user.Id)
+                    db.session.add(volunteer)
+                volunteer.verified = args['verified']
+
+        # Commit changes to the database
+        db.session.commit()
+        return {"msg": "User updated successfully"}, 200
 
 class UserList(Resource):
     @swag_from({
@@ -199,3 +219,106 @@ class UserList(Resource):
             users_data.append(user_data)
 
         return users_data, 200
+
+    @swag_from({
+        'tags': ['Admin'],
+        'summary': 'Create a new user (Admin only)',
+        'responses': {
+            201: {
+                'description': 'User created successfully',
+                'examples': {
+                    'application/json': {'msg': 'User created successfully'}
+                }
+            },
+            409: {
+                'description': 'Username already exists',
+                'examples': {
+                    'application/json': {'msg': 'Username already exists'}
+                }
+            },
+            403: {
+                'description': 'Admin access required',
+                'examples': {
+                    'application/json': {'msg': 'Admin access required'}
+                }
+            }
+        },
+        'parameters': [
+            {
+                'name': 'body',
+                'in': 'body',
+                'required': True,
+                'schema': {
+                    'type': 'object',
+                    'properties': {
+                        'username': {'type': 'string'},
+                        'email': {'type': 'string'},
+                        'password': {'type': 'string'},
+                        'role': {'type': 'integer', 'default': 1, 'description': 'Role of the user (1: Volunteer, 2: Veterinarian)'},
+                        'specialization': {'type': 'string', 'description': 'Specialization of the veterinarian, required if role is 2'},
+                        'telephone': {'type': 'string', 'description': 'Telephone of the veterinarian, required if role is 2'},
+                        'verified': {'type': 'boolean', 'description': 'Verification status of the volunteer, required if role is 1'}
+                    },
+                    'required': ['username', 'email', 'password', 'role']
+                },
+                'description': 'JSON object with user data including optional fields for specific roles'
+            }
+        ]
+    })
+    @jwt_required()
+    def post(self):
+        current_user = get_jwt_identity()
+        if current_user['role'] != 0:
+            return {"msg": "Admin access required"}, 403
+
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', required=True, help="Username cannot be blank.")
+        parser.add_argument('email', required=True, help="Email cannot be blank.")
+        parser.add_argument('password', required=True, help="Password cannot be blank.")
+        parser.add_argument('first_name', required=True, help="First name cannot be blank.")
+        parser.add_argument('last_name', required=True, help="Last name cannot be blank.")
+        parser.add_argument('role', type=int, required=True, help="Role is required.")
+        parser.add_argument('specialization', type=str, required=False, help="Specialization is required if role is 2.")
+        parser.add_argument('telephone', type=str, required=False, help="Telephone is required if role is 2.")
+        parser.add_argument('verified', type=bool, required=False, help="Verified is required if role is 3.")
+        args = parser.parse_args()
+
+        if User.query.filter_by(Username=args['username']).first():
+            return {"msg": "Username already exists"}, 409
+
+        hashed_password = generate_password_hash(args['password'])
+        new_user = User(
+            Username=args['username'],
+            Email=args['email'],
+            FirstName=args['first_name'],
+            LastName=args['last_name'],
+            Hashed_pass=hashed_password,
+            role=args['role']
+        )
+        db.session.add(new_user)
+        db.session.flush()  # Flush to get the user ID for foreign key
+
+        # Handle role-specific data
+        if args['role'] == 2:  # Veterinarian
+            if not args['specialization'] or not args['telephone']:
+                return {"msg": "Specialization and Telephone are required for veterinarians"}, 400
+            veterinarian = Veterinarian(
+                UserId=new_user.Id,
+                Specialization=args['specialization'],
+                Telephone=args['telephone']
+            )
+            db.session.add(veterinarian)
+
+        elif args['role'] == 1:  # Volunteer
+            if args['verified'] is None:
+                return {"msg": "Verified status is required for volunteers"}, 400
+            volunteer = Volunteer(
+                UserId=new_user.Id,
+                verified=args['verified']
+            )
+            db.session.add(volunteer)
+
+        db.session.commit()
+
+        return {"msg": "User created successfully"}, 201
+    

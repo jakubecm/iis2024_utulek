@@ -14,7 +14,7 @@ from controllers.examination_controller import ExaminationRequestList, Examinati
 from controllers.healthrec_controller import HealthRecordList,  HealthRecordById
 from controllers.availableslot_controller import AvailableSlotList, AvailableSlotById
 from controllers.reservationrequest_controller import ReservationList, ReservationById
-from controllers.users_controller import UserManagement, UserList
+from controllers.users_controller import UserById, UserList
 
 # DB import
 from models.database import db
@@ -30,8 +30,9 @@ app.config['SWAGGER'] = {
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Store JWT in cookies
 app.config['JWT_COOKIE_SECURE'] = True  # Only send cookie over HTTPS
-app.config['JWT_COOKIE_CSRF_PROTECT'] = True  # Enable CSRF protection
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Enable CSRF protection
 app.config['JWT_COOKIE_SAMESITE'] = 'None'
+#   app.config['JWT_CSRF_IN_COOKIES'] = True # Neni technika
 CORS(app, supports_credentials=True, origins="http://localhost:5173")
 
 api = Api(app)
@@ -74,4 +75,5 @@ api.add_resource(AvailableSlotById, '/availableslots/<int:slot_id>')
 api.add_resource(ReservationList, '/reservationrequests')
 api.add_resource(ReservationById, '/reservationrequests/<int:reservation_request_id>')
 
-api.add_resource(UserList, '/admin/users')
+api.add_resource(UserList, '/admin/users') 
+api.add_resource(UserById, '/admin/users/<int:user_id>')
