@@ -44,8 +44,10 @@ const UsersDashboard: React.FC = () => {
 
     return (
         <div>
-            <h1>Users Dashboard</h1>
-            <UserTable users={users}/>
+            <h1
+  className="font-bold leading-snug tracking-tight text-slate-800 my-6 w-full text-2xl lg:max-w-3xl lg:text-5xl"
+>Users Dashboard</h1>
+            <UserTable users={users} onUpdateUser={handleUserAdded}/>
                   {/* Add New Cat Button */}
             <Button color="blue" onClick={toggleModal} className="mt-8">
                 Add New User

@@ -1,10 +1,12 @@
-import { Card, Typography } from "@material-tailwind/react";
+import { Button, Card, Dialog, DialogBody, DialogFooter, DialogHeader, Typography } from "@material-tailwind/react";
 import { API_URL } from "../App";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import EditUserForm from "./EditUserForm";
  
 const TABLE_HEAD = ["Role", "Username", "Full Name", "Email", "Telephone", "Specialization", "Verified", ""];
 
 export interface User {
+  Id: number;
   Username: string;
   FirstName: string;
   LastName: string;
@@ -22,9 +24,23 @@ export interface User {
 //        Sloupce by mely fitnout content
 interface UserTableProps {
   users: User[];
+  onUpdateUser: (updatedUser: User) => void; // Function to handle updates
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users }) => {
+const UserTable: React.FC<UserTableProps> = ({ users, onUpdateUser }) => {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const openEditModal = (user: User) => {
+    setSelectedUser(user);
+    setIsEditOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setSelectedUser(null);
+    setIsEditOpen(false);
+  };
+
   return (
     <Card className="h-full w-full overflow-scroll">
       <table className="w-full min-w-max table-auto text-left">
@@ -46,7 +62,7 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
         <tbody>
           {users.map((user, index) => {
             const isLast = index === users.length - 1;
-            const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+            const classes = isLast ? "p-2" : "p-2 border-b border-blue-gray-50";
             const fullName = `${user.FirstName} ${user.LastName}`;
 
             return (
@@ -73,29 +89,48 @@ const UserTable: React.FC<UserTableProps> = ({ users }) => {
                 </td>
                 <td className={classes}>
                   <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.Telephone || "N/A"}
+                    {user.Telephone || "-"}
                   </Typography>
                 </td>
                 <td className={`${classes} bg-blue-gray-50/50`}>
                   <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.Specialization || "N/A"}
+                    {user.Specialization || "-"}
                   </Typography>
                 </td>
                 <td className={classes}>
                   <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.verified ? "Yes" : "No"}
+                    {user.verified && (user.verified ? "Yes" : "No") || "-" }
                   </Typography>
                 </td>
                 <td className={`${classes} bg-blue-gray-50/50`}>
-                  <Typography as="a" href="#" variant="small" color="blue-gray" className="font-medium">
+                <Button color="blue" onClick={() => openEditModal(user)}>
                     Edit
-                  </Typography>
+                  </Button>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+
+      {/* Edit Modal */}
+      {selectedUser && (
+        <Dialog open={isEditOpen} handler={closeEditModal}>
+          <DialogHeader>Edit User</DialogHeader>
+          <DialogBody>
+            <EditUserForm
+              user={selectedUser}
+              onSave={(updatedUser) => {
+                closeEditModal();
+                onUpdateUser(updatedUser);
+              }}
+            />
+          </DialogBody>
+          <DialogFooter>
+            <Button color="red" onClick={closeEditModal}>Cancel</Button>
+          </DialogFooter>
+        </Dialog>
+      )}
     </Card>
   );
 }

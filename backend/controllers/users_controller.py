@@ -119,25 +119,28 @@ class UserById(Resource):
             user.Email = args['Email']
         if args['role'] is not None:
             user.role = args['role']
-        if user.role == 2:  # Update veterinarian-specific fields if the user is a vet
-            if args['Specialization']:
-                veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
-                if not veterinarian:
-                    veterinarian = Veterinarian(UserId=user.Id)  # Create entry if not exists
-                    db.session.add(veterinarian)
+
+        # Update veterinarian-specific fields if the user is a vet
+        if user.role == 2:
+            # Retrieve or create the Veterinarian entry
+            veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
+            if not veterinarian:
+                veterinarian = Veterinarian(UserId=user.Id)
+                db.session.add(veterinarian)
+            
+            # Update Specialization and Telephone if provided
+            if args['Specialization'] is not None:
                 veterinarian.Specialization = args['Specialization']
-            if args['Telephone']:
-                veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
-                if not veterinarian:
-                    veterinarian = Veterinarian(UserId=user.Id)
-                    db.session.add(veterinarian)
+            if args['Telephone'] is not None:
                 veterinarian.Telephone = args['Telephone']
-            if args['verified'] is not None:
-                volunteer = Volunteer.query.filter_by(UserId=user.Id).first()
-                if not volunteer:
-                    volunteer = Volunteer(UserId=user.Id)
-                    db.session.add(volunteer)
-                volunteer.verified = args['verified']
+
+        # Update volunteer-specific fields if applicable
+        if user.role == 1 and args['verified'] is not None:
+            volunteer = Volunteer.query.filter_by(UserId=user.Id).first()
+            if not volunteer:
+                volunteer = Volunteer(UserId=user.Id)
+                db.session.add(volunteer)
+            volunteer.verified = args['verified']
 
         # Commit changes to the database
         db.session.commit()
@@ -204,17 +207,12 @@ class UserList(Resource):
             # Check if the user is a veterinarian
             veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
             if veterinarian:
-                user_data["Veterinarian"] = {
-                    "Specialization": veterinarian.Specialization,
-                    "Telephone": veterinarian.Telephone
-                }
-
+                user_data["Specialization"] = veterinarian.Specialization
+                user_data["Telephone"] = veterinarian.Telephone
             # Check if the user is a volunteer
             volunteer = Volunteer.query.filter_by(UserId=user.Id).first()
             if volunteer:
-                user_data["Volunteer"] = {
-                    "verified": volunteer.verified
-                }
+                user_data["verified"] = volunteer.verified
 
             users_data.append(user_data)
 
@@ -278,9 +276,9 @@ class UserList(Resource):
         parser.add_argument('first_name', required=True, help="First name cannot be blank.")
         parser.add_argument('last_name', required=True, help="Last name cannot be blank.")
         parser.add_argument('role', type=int, required=True, help="Role is required.")
-        parser.add_argument('specialization', type=str, required=False, help="Specialization is required if role is 2.")
-        parser.add_argument('telephone', type=str, required=False, help="Telephone is required if role is 2.")
-        parser.add_argument('verified', type=bool, required=False, help="Verified is required if role is 3.")
+        parser.add_argument('Specialization', type=str, required=False)
+        parser.add_argument('Telephone', type=str, required=False)
+        parser.add_argument('verified', type=bool, required=False)
         args = parser.parse_args()
 
         if User.query.filter_by(Username=args['username']).first():
@@ -296,16 +294,16 @@ class UserList(Resource):
             role=args['role']
         )
         db.session.add(new_user)
-        db.session.flush()  # Flush to get the user ID for foreign key
+        db.session.flush()  # Flush to get the user ID for foreign key references
 
         # Handle role-specific data
         if args['role'] == 2:  # Veterinarian
-            if not args['specialization'] or not args['telephone']:
+            if not args['Specialization'] or not args['Telephone']:
                 return {"msg": "Specialization and Telephone are required for veterinarians"}, 400
             veterinarian = Veterinarian(
                 UserId=new_user.Id,
-                Specialization=args['specialization'],
-                Telephone=args['telephone']
+                Specialization=args['Specialization'],
+                Telephone=args['Telephone']
             )
             db.session.add(veterinarian)
 
@@ -319,6 +317,5 @@ class UserList(Resource):
             db.session.add(volunteer)
 
         db.session.commit()
-
         return {"msg": "User created successfully"}, 201
     
