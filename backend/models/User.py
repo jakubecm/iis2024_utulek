@@ -1,4 +1,5 @@
 from models.database import db
+from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
@@ -11,6 +12,10 @@ class User(db.Model):
     LastName = db.Column(db.String(30), nullable=False)
     Email = db.Column(db.String(50), unique=True, nullable=False)
     role = db.Column(db.SmallInteger, nullable=False)
+
+    # Relationships with cascade delete
+    veterinarian = relationship("Veterinarian", backref="user", cascade="all, delete-orphan", uselist=False)
+    volunteer = relationship("Volunteer", backref="user", cascade="all, delete-orphan", uselist=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -30,4 +35,3 @@ class Volunteer(db.Model):
     __table_args__ = {'schema': 'utulek'}
     UserId = db.Column(db.BigInteger, db.ForeignKey('utulek.users.Id'), primary_key=True)
     verified = db.Column(db.Boolean, nullable=False, default=False)
-
