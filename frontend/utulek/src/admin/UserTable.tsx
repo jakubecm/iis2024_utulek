@@ -24,7 +24,7 @@ export interface User {
 //        Sloupce by mely fitnout content
 interface UserTableProps {
   users: User[];
-  onUpdateUser: (updatedUser: User) => void; // Function to handle updates
+  onUpdateUser: () => void; // Function to handle updates
 }
 
 const UserTable: React.FC<UserTableProps> = ({ users, onUpdateUser }) => {
@@ -120,9 +120,9 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUpdateUser }) => {
           <DialogBody>
             <EditUserForm
               user={selectedUser}
-              onSave={(updatedUser) => {
+              onModification={() => {
                 closeEditModal();
-                onUpdateUser(updatedUser);
+                onUpdateUser();
               }}
             />
           </DialogBody>
