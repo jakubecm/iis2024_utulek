@@ -150,3 +150,53 @@ class SpeciesById(Resource):
         db.session.delete(species)
         db.session.commit()
         return {"msg": "Species deleted successfully"}, 200
+    
+    @swag_from({
+        'tags': ['Species'],
+        'summary': 'Update a species',
+        'responses': {
+            200: {
+                'description': 'Species updated successfully',
+                'examples': {
+                    'application/json': {'msg': 'Species updated successfully'}
+                }
+            },
+            404: {
+                'description': 'Species not found',
+                'examples': {
+                    'application/json': {'msg': 'Species not found'}
+                }
+            }
+        },
+        'parameters': [
+            {
+                'name': 'species_id',
+                'in': 'path',
+                'required': True,
+                'type': 'integer',
+                'description': 'ID of the species to update'
+            },
+            {
+                'name': 'body',
+                'in': 'body',
+                'required': True,
+                'schema': {
+                    'type': 'object',
+                    'properties': {
+                        'name': {'type': 'string', 'description': 'New name of the species'}
+                    },
+                    'required': ['name']
+                },
+                'description': 'JSON object containing updated species data'
+            }
+        ]
+    })
+    def put(self, species_id): # Update species by ID
+        species = Species.query.get(species_id)
+        if not species:
+            return {"msg": "Species not found"}, 404
+
+        args = species_parser.parse_args()
+        species.Name = args['name']
+        db.session.commit()
+        return {"msg": "Species updated successfully"}, 200
