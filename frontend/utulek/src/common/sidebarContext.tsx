@@ -105,11 +105,22 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
     },
   ];
 
+  // Define caregiver-specific sidebar data
+  const caregiverSidebarData: SidebarItem[] = [
+    {
+      label: 'Species',
+      icon: <UserCircleIcon className="h-5 w-5" />,
+      route: '/caregiver/species',
+    },
+  ];
+
   // Select data based on role
   const sidebarData = React.useMemo(() => {
     switch (role) {
       case Role.ADMIN:
-        return [...adminSidebarData, ...userSidebarData];
+        return [...adminSidebarData, ...userSidebarData, ...caregiverSidebarData];
+      case Role.CAREGIVER:
+        return caregiverSidebarData;
       case Role.USER:
         return userSidebarData;
       default:
