@@ -16,50 +16,51 @@ const CatList: React.FC = () => {
   const { isAuthenticated, role } = useAuth();
   const [species, setSpecies] = useState<{ [key: number]: string }>({});
 
-  useEffect(() => {
+  const fetchCats = () => {
     fetch(`${API_URL}/cats`)
       .then(response => response.json())
       .then(data => {
         setCats(data);
-        // Initialize photo index tracking for each cat
         const initialIndices: { [key: number]: number } = {};
         data.forEach((cat: Cat) => {
-          initialIndices[cat.id] = 0; // Start with the first photo
+          initialIndices[cat.id] = 0;
         });
-        
         setPhotoIndices(initialIndices);
       })
-
       .catch(error => console.error("Error fetching cats:", error));
-  }, []);
-
-  useEffect(() => {
-    fetch(`${API_URL}/species`)
-      .then(response => response.json())
-      .then(data => {
-        const speciesMap: { [key: number]: string } = {};
-        data.forEach((sp: { id: number; name: string }) => {
-          speciesMap[sp.id] = sp.name;
-        });
-        setSpecies(speciesMap);
-      })
-      .catch(error => console.error("Error fetching species:", error));
-  }, []);
-
-  const handleCatAdded = (newCat: Cat) => {
-    setCats(prevCats => [...prevCats, newCat]);
-    setIsModalOpen(false);
   };
 
-  const handleCatDeleted = (deletedCatId: number) =>
-    setCats(prevCats => prevCats.filter(cat => cat.id !== deletedCatId));
+    useEffect(() => {
+      fetchCats();
+    }, []);
 
-  const handleCatUpdated = (updatedCat: Cat) => {
-    setCats(prevCats =>
-      prevCats.map(cat => (cat.id === updatedCat.id ? updatedCat : cat))
-    );
-    setSelectedCat(null);
-  };
+    useEffect(() => {
+      fetch(`${API_URL}/species`)
+        .then(response => response.json())
+        .then(data => {
+          const speciesMap: { [key: number]: string } = {};
+          data.forEach((sp: { id: number; name: string }) => {
+            speciesMap[sp.id] = sp.name;
+          });
+          setSpecies(speciesMap);
+        })
+        .catch(error => console.error("Error fetching species:", error));
+    }, []);
+
+    const handleCatAdded = (newCat: Cat) => {
+      fetchCats();
+      setIsModalOpen(false);
+    };
+
+    const handleCatDeleted = (deletedCatId: number) => {
+      fetchCats();
+    };
+
+    const handleCatUpdated = (updatedCat: Cat) => {
+      fetchCats();
+      setSelectedCat(null);
+    };
+
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
