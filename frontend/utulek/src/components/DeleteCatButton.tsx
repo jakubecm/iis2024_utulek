@@ -1,4 +1,5 @@
 import React from 'react';
+import { API_URL } from "../App";
 
 interface DeleteCatButtonProps {
   catId: number;
@@ -8,7 +9,8 @@ interface DeleteCatButtonProps {
 const DeleteCatButton: React.FC<DeleteCatButtonProps> = ({ catId, onCatDeleted }) => {
   const handleDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/cats/${catId}`, {
+      const response = await fetch(`${API_URL}/cats/${catId}`, {
+        credentials: 'include',
         method: 'DELETE',
       });
 
@@ -16,7 +18,6 @@ const DeleteCatButton: React.FC<DeleteCatButtonProps> = ({ catId, onCatDeleted }
         // Handle error if the response is not ok
         const errorData = await response.json();
         console.error("Error deleting cat:", errorData);
-        alert(`Error deleting cat: ${errorData.msg}`);
         return;
       }
 

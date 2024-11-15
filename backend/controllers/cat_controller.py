@@ -1,5 +1,6 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flasgger import swag_from
 from models.Cat import Cats
 from models.database import db
@@ -89,7 +90,13 @@ class CatList(Resource):
             }
         ]
     })
+    @jwt_required()
     def post(self): # Create a new cat
+        current_user = get_jwt_identity()
+        print(current_user)
+        if current_user['role'] != 0 and current_user['role'] != 2:
+            return {"msg": "Admin or Caretaker access required"}, 403
+        
         args = cat_parser.parse_args()
         new_cat = Cats(
             Name=args['name'],
@@ -203,7 +210,13 @@ class CatById(Resource):
             }
         ]
     })
+    @jwt_required()
     def put(self, cat_id): # Update a cat by ID
+        current_user = get_jwt_identity()
+        print(current_user)
+        if current_user['role'] != 0:
+            return {"msg": "Admin or Caretaker access required"}, 403
+        
         cat = Cats.query.get(cat_id)
         if not cat:
             return {"msg": "Cat not found"}, 404
@@ -245,7 +258,12 @@ class CatById(Resource):
             }
         ]
     })
+    @jwt_required()
     def delete(self, cat_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] != 0 and current_user['role'] != 2:
+            return {"msg": "Admin or Caretaker access required"}, 403
+        
         cat = Cats.query.get(cat_id)
         if not cat:
             return {"msg": "Cat not found"}, 404

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Input, Textarea, Typography, Select, Option } from "@material-tailwind/react";
 import { Cat } from '../types';
 import { Species } from '../types';
+import { API_URL } from "../App";
 
 interface EditCatFormProps {
   cat: Cat;
@@ -23,7 +24,7 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
   useEffect(() => {
     const fetchSpecies = async () => {
       try {
-        const response = await fetch('http://localhost:5000/species');
+        const response = await fetch(`${API_URL}/species`);
         const data = await response.json();
         setSpeciesList(data);
 
@@ -43,7 +44,7 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
     formData.append('cat_id', String(cat.id));
 
     try {
-      const response = await fetch('http://localhost:5000/cat/photo/upload', {
+      const response = await fetch(`${API_URL}/cat/photo/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -71,9 +72,10 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
         found,
       };
 
-      const response = await fetch(`http://localhost:5000/cats/${cat.id}`, {
+      const response = await fetch(`${API_URL}/cats/${cat.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(updatedCatData),
       });
 
@@ -119,6 +121,9 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
             required
             size="lg"
           >
+            <Option value="" disabled>
+              Choose species
+            </Option>
             {speciesList.map((species) => (
               <Option key={species.id} value={String(species.id)}>
                 {species.name}
