@@ -4,15 +4,20 @@ import EditCatForm from '../components/EditCatForm';
 import DeleteCatButton from '../components/DeleteCatButton';
 import { Card, CardBody, CardFooter, Typography, Button, Dialog, DialogBody, DialogFooter } from "@material-tailwind/react";
 import { Cat } from '../types';
+import { useAuth } from '../auth/AuthContext';
+import { Role } from '../auth/jwt';
+import { API_URL } from "../App";
 
 const CatList: React.FC = () => {
   const [cats, setCats] = useState<Cat[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCat, setSelectedCat] = useState<Cat | null>(null);
   const [photoIndices, setPhotoIndices] = useState<{ [key: number]: number }>({});
+  const { isAuthenticated, role } = useAuth();
+  const [species, setSpecies] = useState<{ [key: number]: string }>({});
 
   useEffect(() => {
-    fetch('http://localhost:5000/cats')
+    fetch(`${API_URL}/cats`)
       .then(response => response.json())
       .then(data => {
         setCats(data);
@@ -26,6 +31,19 @@ const CatList: React.FC = () => {
       })
 
       .catch(error => console.error("Error fetching cats:", error));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/species`)
+      .then(response => response.json())
+      .then(data => {
+        const speciesMap: { [key: number]: string } = {};
+        data.forEach((sp: { id: number; name: string }) => {
+          speciesMap[sp.id] = sp.name;
+        });
+        setSpecies(speciesMap);
+      })
+      .catch(error => console.error("Error fetching species:", error));
   }, []);
 
   const handleCatAdded = (newCat: Cat) => {
@@ -73,8 +91,8 @@ const CatList: React.FC = () => {
         {cats.map(cat => {
           const currentPhotoIndex = photoIndices[cat.id] || 0;
           const imageUrl = cat.photos && cat.photos.length > 0 // Check if photos exist
-            ? `http://localhost:5000/${cat.photos[currentPhotoIndex].replace('./', '')}`
-            : 'http://localhost:5000/catphotos/default-image.png';
+            ? `${API_URL}/${cat.photos[currentPhotoIndex].replace('./', '')}`
+            : `${API_URL}/catphotos/default-image.png`;
   
           return (
             <Card key={cat.id} className="w-full max-w-md mx-auto shadow-lg">
@@ -113,15 +131,22 @@ const CatList: React.FC = () => {
                 <Typography color="gray" className="text-sm mb-2">
                   Age: {cat.age}
                 </Typography>
+                <Typography color="gray" className="text-sm mb-2">
+                  Species: {species[cat.species_id] || "Unknown"}
+                </Typography>
                 <Typography color="gray" className="text-sm">
                   {cat.description}
                 </Typography>
               </CardBody>
               <CardFooter className="flex justify-between">
-                <DeleteCatButton catId={cat.id} onCatDeleted={handleCatDeleted} />
-                <Button color="blue-gray" onClick={() => setSelectedCat(cat)}>
-                  Edit
-                </Button>
+                {(role === Role.CAREGIVER || role === Role.ADMIN) && (
+                  <>
+                    <DeleteCatButton catId={cat.id} onCatDeleted={handleCatDeleted} />
+                    <Button color="blue-gray" onClick={() => setSelectedCat(cat)}>
+                      Edit
+                    </Button>
+                  </>
+                )}
               </CardFooter>
             </Card>
           );
@@ -129,9 +154,11 @@ const CatList: React.FC = () => {
       </div>
   
       {/* Add New Cat Button */}
-      <Button color="blue" onClick={toggleModal} className="mt-8">
-        Add New Cat
-      </Button>
+      {(role === Role.CAREGIVER || role === Role.ADMIN) && (
+        <Button color="blue" onClick={toggleModal} className="mt-8">
+          Add New Cat
+        </Button>
+      )}
   
       {/* Add New Cat Dialog */}
       <Dialog open={isModalOpen} handler={toggleModal} size="lg">
