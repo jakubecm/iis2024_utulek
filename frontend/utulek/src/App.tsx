@@ -8,6 +8,7 @@ import Logout from './auth/Logout';
 import ProtectedRoute from './auth/ProtectedRoute';
 import UsersDashboard from './admin/UsersDashboard';
 import SpeciesDashboard from './caregiver/SpeciesDashboard';
+import HealthRecords from './vets/HealthRecords';
 
 export const API_URL = "http://127.0.0.1:5000";
 
@@ -31,6 +32,9 @@ function App() {
                 </Route>
                 <Route element={<ProtectedRoute requiredRole={0} />}> {/* CHANGE TO 2 AFTER CAREGIVER PROPERLY IMPLEMENTED */}
                   <Route path="/caregiver/species" element={<SpeciesDashboard />} />
+                </Route>
+                <Route element={<ProtectedRoute requiredRole={2} />}>
+                  <Route path="/vets/HealthRecords" element={<HealthRecords />} />
                 </Route>
               </Routes>
             </div>

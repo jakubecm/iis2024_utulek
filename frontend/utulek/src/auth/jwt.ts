@@ -6,5 +6,6 @@ export enum Role {
     UNAUTHORIZED = -1,
     ADMIN = 0,
     USER = 1,
-    CAREGIVER = 2,
+    VETS = 2,
+    CAREGIVER = 3,
 }

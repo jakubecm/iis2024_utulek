@@ -112,6 +112,19 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       icon: <UserCircleIcon className="h-5 w-5" />,
       route: '/caregiver/species',
     },
+    {
+      label: 'Health Records',
+      icon: <ShoppingBagIcon className="h-5 w-5" />,
+      route: '/vets/healthrecords',
+    }
+  ];
+
+  const vetsSidebarData: SidebarItem[] = [
+    {
+      label: 'Health Records',
+      icon: <ShoppingBagIcon className="h-5 w-5" />,
+      route: '/vets/healthrecords',
+    }
   ];
 
   // Select data based on role
@@ -123,6 +136,8 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
         return caregiverSidebarData;
       case Role.USER:
         return userSidebarData;
+      case Role.VETS:
+        return vetsSidebarData;
       default:
         return sidebarUnauthData;
     }
