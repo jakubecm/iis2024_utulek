@@ -1,13 +1,15 @@
 from flasgger import swag_from
 from flask import jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 from models.HealthRecord import HealthRecord
 from models.database import db
+from models.User import User
 
 health_record_parser = reqparse.RequestParser()
 health_record_parser.add_argument('date', type=str, required=True, help="Date cannot be blank.")
 health_record_parser.add_argument('description', type=str, required=True, help="Description cannot be blank.")
-health_record_parser.add_argument('vet_id', type=int, required=True, help="Vet ID cannot be blank.")
+# health_record_parser.add_argument('vet_id', type=int, required=True, help="Vet ID cannot be blank.")
 
 class HealthRecordList(Resource):
     @swag_from({
@@ -23,7 +25,7 @@ class HealthRecordList(Resource):
                             'cat_id': 1,
                             'date': '2021-01-01',
                             'description': 'Cat has a cold',
-                            'vet_id': 1
+                            'vet_name': 'Dr. John Doe'
                         }
                     ]
                 }
@@ -39,14 +41,21 @@ class HealthRecordList(Resource):
         ]
     })
     def get(self, cat_id):
-        health_records = HealthRecord.query.filter_by(CatId=cat_id).all()
+        # Fetch health records with joined vet info
+        health_records = (
+            db.session.query(HealthRecord, User)
+            .join(User, HealthRecord.VetId == User.Id)  # Join with the User table
+            .filter(HealthRecord.CatId == cat_id)
+            .all()
+        )
+        
         health_record_list = [
             {
-                'id': hr.Id,
-                'cat_id': hr.CatId,
-                'date': hr.Date.strftime('%Y-%m-%d'),
-                'description': hr.Description,
-                'vet_id': hr.VetId
+                'id': hr.HealthRecord.Id,
+                'cat_id': hr.HealthRecord.CatId,
+                'date': hr.HealthRecord.Date.strftime('%Y-%m-%d'),
+                'description': hr.HealthRecord.Description,
+                'vet_name': f"{hr.User.FirstName} {hr.User.LastName}"  # Combine first and last names
             }
             for hr in health_records
         ]
@@ -99,14 +108,20 @@ class HealthRecordList(Resource):
             }
         ]
     })
+    @jwt_required()
     def post(self, cat_id): # Create a new health record
+        current_user = get_jwt_identity()
+        print(current_user)
+        if current_user['role'] != 0 and current_user['role'] != 2:
+            return {"msg": "Unauthorized user"}, 401
+        
         args = health_record_parser.parse_args()
 
         new_health_record = HealthRecord(
             CatId = cat_id,
             Date = args['date'],
             Description = args['description'],
-            VetId = args['vet_id']
+            VetId = current_user['user_id']
         )
 
         db.session.add(new_health_record)
