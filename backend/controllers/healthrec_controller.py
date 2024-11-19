@@ -2,6 +2,7 @@ from flasgger import swag_from
 from flask import jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
+from models.Enums import Roles
 from models.HealthRecord import HealthRecord
 from models.database import db
 from models.User import User
@@ -112,7 +113,7 @@ class HealthRecordList(Resource):
     def post(self, cat_id): # Create a new health record
         current_user = get_jwt_identity()
         print(current_user)
-        if current_user['role'] != 0 and current_user['role'] != 2:
+        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.VETS.value:
             return {"msg": "Unauthorized user"}, 401
         
         args = health_record_parser.parse_args()

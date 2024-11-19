@@ -5,6 +5,7 @@ from models.User import User
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, jwt_required, get_jwt_identity, get_jwt
 from flasgger import swag_from
 from models.database import db
+from models.Enums import Roles
 from datetime import timedelta
 
 class Register(Resource):
@@ -74,7 +75,7 @@ class Register(Resource):
             Hashed_pass = hashed_password,
             FirstName = args['first_name'],
             LastName = args['last_name'],
-            role=0
+            role = Roles.USER.value
         )
         db.session.add(new_user)
         db.session.commit()
@@ -180,4 +181,4 @@ class GetUserRole(Resource):
             expires_at = get_jwt()["exp"]  # exp is the expiration time in seconds since epoch
             return jsonify({"role": current_user['role'], "expires_at": expires_at})
         else:
-            return jsonify({"role": -1})
+            return jsonify({"role": Roles.UNAUTHORIZED.value})

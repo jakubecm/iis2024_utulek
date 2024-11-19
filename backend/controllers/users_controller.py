@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash
 from flasgger import swag_from
 from models.User import User, Veterinarian, Volunteer
+from models.Enums import Roles
 from models.database import db
 
 class UserById(Resource):
@@ -42,7 +43,7 @@ class UserById(Resource):
     @jwt_required()
     def delete(self, user_id):
         current_user = get_jwt_identity()
-        if current_user['role'] != 0:
+        if current_user['role'] != Roles.ADMIN.value:
             return {"msg": "Admin access required"}, 403
 
         user = User.query.get(user_id)
@@ -89,7 +90,7 @@ class UserById(Resource):
     @jwt_required()
     def put(self, user_id):
         current_user = get_jwt_identity()
-        if current_user['role'] != 0:
+        if current_user['role'] != Roles.ADMIN.value:
             return {"msg": "Admin access required"}, 403
 
         user = User.query.get(user_id)
@@ -121,7 +122,7 @@ class UserById(Resource):
             user.role = args['role']
 
         # Update veterinarian-specific fields if the user is a vet
-        if user.role == 2:
+        if user.role == Roles.VETS.value:
             # Retrieve or create the Veterinarian entry
             veterinarian = Veterinarian.query.filter_by(UserId=user.Id).first()
             if not veterinarian:
@@ -135,7 +136,7 @@ class UserById(Resource):
                 veterinarian.Telephone = args['Telephone']
 
         # Update volunteer-specific fields if applicable
-        if user.role == 1 and args['verified'] is not None:
+        if user.role == Roles.USER.value and args['verified'] is not None:
             volunteer = Volunteer.query.filter_by(UserId=user.Id).first()
             if not volunteer:
                 volunteer = Volunteer(UserId=user.Id)
@@ -187,7 +188,7 @@ class UserList(Resource):
     @jwt_required()
     def get(self):
         current_user = get_jwt_identity()
-        if current_user['role'] != 0:
+        if current_user['role'] != Roles.ADMIN.value:
             return {"msg": "Admin access required"}, 403
 
         # Retrieve all users
@@ -266,7 +267,7 @@ class UserList(Resource):
     @jwt_required()
     def post(self):
         current_user = get_jwt_identity()
-        if current_user['role'] != 0:
+        if current_user['role'] != Roles.ADMIN.value:
             return {"msg": "Admin access required"}, 403
 
         parser = reqparse.RequestParser()
@@ -297,7 +298,7 @@ class UserList(Resource):
         db.session.flush()  # Flush to get the user ID for foreign key references
 
         # Handle role-specific data
-        if args['role'] == 2:  # Veterinarian
+        if args['role'] == Roles.VETS.value:
             if not args['Specialization'] or not args['Telephone']:
                 return {"msg": "Specialization and Telephone are required for veterinarians"}, 400
             veterinarian = Veterinarian(
@@ -307,7 +308,7 @@ class UserList(Resource):
             )
             db.session.add(veterinarian)
 
-        elif args['role'] == 1:  # Volunteer
+        elif args['role'] == Roles.USER.value:  # Volunteer
             if args['verified'] is None:
                 return {"msg": "Verified status is required for volunteers"}, 400
             volunteer = Volunteer(

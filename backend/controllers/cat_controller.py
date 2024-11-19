@@ -5,6 +5,7 @@ from flasgger import swag_from
 from models.Cat import Cats
 from models.database import db
 from models.Cat import CatPhotos
+from models.Enums import Roles
 
 # Parser for Cat endpoints
 cat_parser = reqparse.RequestParser()
@@ -94,7 +95,7 @@ class CatList(Resource):
     def post(self): # Create a new cat
         current_user = get_jwt_identity()
         print(current_user)
-        if current_user['role'] != 0 and current_user['role'] != 2:
+        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
             return {"msg": "Admin or Caretaker access required"}, 403
         
         args = cat_parser.parse_args()
@@ -214,7 +215,7 @@ class CatById(Resource):
     def put(self, cat_id): # Update a cat by ID
         current_user = get_jwt_identity()
         print(current_user)
-        if current_user['role'] != 0:
+        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
             return {"msg": "Admin or Caretaker access required"}, 403
         
         cat = Cats.query.get(cat_id)
@@ -261,7 +262,7 @@ class CatById(Resource):
     @jwt_required()
     def delete(self, cat_id):
         current_user = get_jwt_identity()
-        if current_user['role'] != 0 and current_user['role'] != 2:
+        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
             return {"msg": "Admin or Caretaker access required"}, 403
         
         cat = Cats.query.get(cat_id)
