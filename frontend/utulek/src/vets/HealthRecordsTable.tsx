@@ -1,6 +1,8 @@
 import React from 'react';
 import { Button, Card, Typography } from '@material-tailwind/react';
 import { HealthRecord } from '../types';
+import { useAuth } from "../auth/AuthContext";
+import { Role } from "../auth/jwt";
 
 interface HealthRecordsTableProps {
   healthRecords: HealthRecord[];
@@ -12,6 +14,8 @@ const HealthRecordsTable: React.FC<HealthRecordsTableProps> = ({
   healthRecords,
   onEdit,
 }) => {
+  const { role } = useAuth(); // Get the role of the current user
+
   return (
     <Card className="h-full w-full overflow-scroll">
       <table className="w-full min-w-max table-auto text-left">
@@ -54,9 +58,11 @@ const HealthRecordsTable: React.FC<HealthRecordsTableProps> = ({
                 </Typography>
               </td>
               <td className="p-4 border-b border-blue-gray-50">
-                <Button color="blue" onClick={() => onEdit(record)}>
-                  Edit
-                </Button>
+                {role === Role.VETS && (
+                  <Button color="blue" onClick={() => onEdit(record)}>
+                    Edit
+                  </Button>
+                )}
               </td>
             </tr>
           ))}
