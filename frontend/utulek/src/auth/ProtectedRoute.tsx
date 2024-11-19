@@ -2,16 +2,17 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 interface ProtectedRouteProps {
-  requiredRole?: number; // defaults to admin (0)
+  requiredRoles: number[]; // defaults to admin (0)
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole = 0 }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {
   const { isAuthenticated, role } = useAuth();
   console.log("protected role:", role);
   console.log("isAuthenticated:", isAuthenticated);
+  console.log("requiredRoles:", requiredRoles);
 
   // Check if the user is authenticated and has the required role
-  if (!isAuthenticated || role !== requiredRole) {
+  if (!isAuthenticated || role && !requiredRoles.includes(role)) {
     // Redirect to login if unauthenticated or unauthorized
     return <Navigate to="/login" replace />;
   }
