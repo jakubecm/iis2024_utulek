@@ -25,7 +25,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onUserAdded }) => {
         setError(null);
 
         try {
-            const userData: any = {
+            const userData: unknown = {
                 username: username,
                 password: password,
                 first_name: firstName,
@@ -121,8 +121,10 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onUserAdded }) => {
                         onChange={(value = '1') => setRole(value)}
                         size="lg"
                     >
+                        <Option value="0">Admin</Option>
                         <Option value="1">Volunteer</Option>
                         <Option value="2">Veterinarian</Option>
+                        <Option value="3">Caregiver</Option>
                     </Select>
 
                     {role === '2' && (
