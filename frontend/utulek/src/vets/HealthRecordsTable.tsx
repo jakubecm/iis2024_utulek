@@ -1,14 +1,16 @@
 import React from 'react';
-import { Card, Typography } from '@material-tailwind/react';
+import { Button, Card, Typography } from '@material-tailwind/react';
 import { HealthRecord } from '../types';
 
 interface HealthRecordsTableProps {
   healthRecords: HealthRecord[];
   onAdd: () => void; // Function to open the form for adding a new health record
+  onEdit: (record: HealthRecord) => void; // Function to edit a health record
 }
 
 const HealthRecordsTable: React.FC<HealthRecordsTableProps> = ({
   healthRecords,
+  onEdit,
 }) => {
   return (
     <Card className="h-full w-full overflow-scroll">
@@ -30,6 +32,7 @@ const HealthRecordsTable: React.FC<HealthRecordsTableProps> = ({
                 Veterinarian
               </Typography>
             </th>
+            <th style={{ width: '100px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"></th>
           </tr>
         </thead>
         <tbody>
@@ -49,6 +52,11 @@ const HealthRecordsTable: React.FC<HealthRecordsTableProps> = ({
                 <Typography variant="small" color="blue-gray" className="font-normal">
                   {record.vet_name || "Unknown"}
                 </Typography>
+              </td>
+              <td className="p-4 border-b border-blue-gray-50">
+                <Button color="blue" onClick={() => onEdit(record)}>
+                  Edit
+                </Button>
               </td>
             </tr>
           ))}
