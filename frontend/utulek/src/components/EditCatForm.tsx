@@ -3,6 +3,7 @@ import { Button, Input, Textarea, Typography, Select, Option } from "@material-t
 import { Cat } from '../types';
 import { Species } from '../types';
 import { API_URL } from "../App";
+import AsyncSelect from './AsyncSelect';
 
 interface EditCatFormProps {
   cat: Cat;
@@ -114,22 +115,18 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
             required
             size="lg"
           />
-          <Select
+          <AsyncSelect
             label="Species"
-            value={speciesId ? String(speciesId) : ""}
-            onChange={(value) => setSpeciesId(Number(value))}
-            required
+            value={String(speciesId)}
+            onChange={(idAsString) => setSpeciesId(Number(idAsString))}
             size="lg"
-          >
-            <Option value="" disabled>
-              Choose species
-            </Option>
+            >
             {speciesList.map((species) => (
               <Option key={species.id} value={String(species.id)}>
                 {species.name}
               </Option>
             ))}
-          </Select>
+          </AsyncSelect>
           <Input
             label="Age"
             type="number"

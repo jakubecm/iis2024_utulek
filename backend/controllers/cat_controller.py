@@ -47,7 +47,7 @@ class CatList(Resource):
                 'species_id': cat.SpeciesId,
                 'age': cat.Age,
                 'description': cat.Description,
-                'found': cat.Found,
+                'found': cat.Found.strftime('%Y-%m-%d'),
                 'photos': [photo.PhotoUrl for photo in CatPhotos.query.filter_by(CatId=cat.Id).all()]
             } 
             for cat in cats
