@@ -9,6 +9,7 @@ import ProtectedRoute from './auth/ProtectedRoute';
 import UsersDashboard from './admin/UsersDashboard';
 import SpeciesDashboard from './caregiver/SpeciesDashboard';
 import HealthRecords from './vets/HealthRecords';
+import { Role } from './auth/jwt';
 
 export const API_URL = "http://127.0.0.1:5000";
 
@@ -27,13 +28,13 @@ function App() {
                 <Route path="/logout" element={<Logout />} />
 
                 {/* Protected routes */}
-                <Route element={<ProtectedRoute requiredRole={0} />}>
+                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN]} />}>
                   <Route path="/admin/users" element={<UsersDashboard />} />
                 </Route>
-                <Route element={<ProtectedRoute requiredRole={0} />}> {/* CHANGE TO 2 AFTER CAREGIVER PROPERLY IMPLEMENTED */}
+                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
                   <Route path="/caregiver/species" element={<SpeciesDashboard />} />
                 </Route>
-                <Route element={<ProtectedRoute requiredRole={2} />}>
+                <Route element={<ProtectedRoute requiredRoles={[Role.VETS]} />}>
                   <Route path="/vets/HealthRecords" element={<HealthRecords />} />
                 </Route>
               </Routes>
