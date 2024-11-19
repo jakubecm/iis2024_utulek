@@ -1,5 +1,5 @@
 from flasgger import swag_from
-from flask import jsonify
+from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 from models.Enums import Roles
@@ -228,15 +228,21 @@ class HealthRecordById(Resource):
             }
         ]
     })
+    @jwt_required()
     def put(self, health_record_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.VETS.value:
+            return {"msg": "Unauthorized user"}, 401
+        
         args = health_record_parser.parse_args()
+        data = request.get_json()
 
         health_record = HealthRecord.query.filter_by(Id=health_record_id).first()
         if health_record:
-            health_record.CatId = args['cat_id']
+            health_record.CatId = data['cat_id']
             health_record.Date = args['date']
             health_record.Description = args['description']
-            health_record.VetId = args['vet_id']
+            health_record.VetId = current_user['user_id']
 
             db.session.commit()
             return {"msg": "Health record updated successfully"}, 200

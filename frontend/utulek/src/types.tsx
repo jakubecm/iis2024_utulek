@@ -12,3 +12,11 @@ export interface Species {
     id: number;
     name: string;
   }
+
+export interface HealthRecord {
+    id: number;
+    cat_id: number;
+    date: string;
+    description: string;
+    vet_name: string;
+  }

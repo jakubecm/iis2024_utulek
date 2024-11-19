@@ -137,7 +137,7 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       case Role.USER:
         return userSidebarData;
       case Role.VETS:
-        return vetsSidebarData;
+        return [...vetsSidebarData, ...userSidebarData];
       default:
         return sidebarUnauthData;
     }
