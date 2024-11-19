@@ -136,7 +136,7 @@ class UserById(Resource):
                 veterinarian.Telephone = args['Telephone']
 
         # Update volunteer-specific fields if applicable
-        if user.role == Roles.USER.value and args['verified'] is not None:
+        if user.role == Roles.VOLUNTEER.value and args['verified'] is not None:
             volunteer = Volunteer.query.filter_by(UserId=user.Id).first()
             if not volunteer:
                 volunteer = Volunteer(UserId=user.Id)
@@ -308,7 +308,7 @@ class UserList(Resource):
             )
             db.session.add(veterinarian)
 
-        elif args['role'] == Roles.USER.value:  # Volunteer
+        elif args['role'] == Roles.VOLUNTEER.value:  # Volunteer
             if args['verified'] is None:
                 return {"msg": "Verified status is required for volunteers"}, 400
             volunteer = Volunteer(

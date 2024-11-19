@@ -75,7 +75,7 @@ class Register(Resource):
             Hashed_pass = hashed_password,
             FirstName = args['first_name'],
             LastName = args['last_name'],
-            role = Roles.USER.value
+            role = Roles.VOLUNTEER.value
         )
         db.session.add(new_user)
         db.session.commit()
