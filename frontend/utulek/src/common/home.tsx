@@ -163,15 +163,17 @@ const CatList: React.FC = () => {
           Add New Cat
         </Button>
       )}
-      <Dialog open={isModalOpen} handler={toggleModal} size="lg">
-        <DialogBody>
-          <AddCatForm onCatAdded={handleCatAdded} />
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="text" color="red" onClick={toggleModal} className="mr-2">
-            Cancel
-          </Button>
-        </DialogFooter>
+      <Dialog open={isModalOpen} handler={toggleModal} size="xs" className="!max-w-[30rem] !min-w-[26rem]">
+        <Card className="mx-auto w-full !max-w-[30rem] !min-w-[26rem] px-2">
+          <CardBody className="flex flex-col gap-4">
+            <AddCatForm onCatAdded={handleCatAdded} />
+          </CardBody>
+          <CardFooter className="pt-0">
+            <Button variant="text" color="red" onClick={toggleModal} className="mr-2 ml-a">
+              Cancel
+            </Button>
+          </CardFooter>
+        </Card>
       </Dialog>
       {selectedCat && (
         <Dialog open={Boolean(selectedCat)} handler={() => setSelectedCat(null)} size="lg">

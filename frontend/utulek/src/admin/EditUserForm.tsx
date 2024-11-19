@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Input, Select, Option } from "@material-tailwind/react";
+import { Button, Input, Select, Option, Typography } from "@material-tailwind/react";
 import { User } from "./UserTable";
 import { API_URL } from "../App";
 
@@ -61,6 +61,10 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onModification }) => 
     }
 
     return (
+        <>
+        <Typography variant="h4" color="blue-gray" className="mb-4 text-center font-semibold">
+            Edit User
+        </Typography>
         <form onSubmit={handleSubmit} className="space-y-4">
             <Input
                 label="Username"
@@ -136,6 +140,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onModification }) => 
                 </Button>
             </div>
         </form>
+        </>
     );
 };
 

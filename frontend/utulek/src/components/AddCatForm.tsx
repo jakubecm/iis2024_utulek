@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Textarea, Typography, Option } from "@material-tailwind/react";
+import { Button, Input, Textarea, Typography, Option, Card, CardBody } from "@material-tailwind/react";
 import { Species } from '../types';
 import { API_URL } from "../App";
 import AsyncSelect from './AsyncSelect';
@@ -133,77 +133,75 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
   
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
-        <Typography variant="h4" color="blue-gray" className="mb-4 text-center font-semibold">
-          Add a New Cat
-        </Typography>
-        <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-          <Input
-            label="Name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            size="lg"
-            required
-          />
+    <>
+      <Typography variant="h4" color="blue-gray" className="mb-4 text-center font-semibold">
+        Add a New Cat
+      </Typography>
+      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+        <Input
+          label="Name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          size="lg"
+          required
+        />
 
-          <AsyncSelect
-            label="Species"
-            value={String(speciesId)}
-            onChange={(idAsString) => setSpeciesId(Number(idAsString))}
-            size="lg"
-            >
-            {speciesList.map((species) => (
-              <Option key={species.id} value={String(species.id)}>
-                {species.name}
-              </Option>
-            ))}
-          </AsyncSelect>
-          {errors.speciesId && <p className="text-red-500 text-sm">{errors.speciesId}</p>}
-          <Input
-            label="Age"
-            type="number"
-            value={age}
-            onChange={(e) => setAge(Number(e.target.value))}
-            size="lg"
-            required
-          />
-          {errors.age && <p className="text-red-500 text-sm">{errors.age}</p>}
-          <Textarea
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            size="lg"
-            required
-          />
-          {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
-          <Input
-            label="Found Date"
-            type="date"
-            value={found}
-            onChange={(e) => setFound(e.target.value)}
-            size="lg"
-            required
-          />
-          {/* File input for photo */}
-          <Input
-            label="Upload Photo"
-            type="file"
-            onChange={(e) => {
-              const selectedFile = e.target.files ? e.target.files[0] : null;
-              setFile(selectedFile);
-              console.log("Selected file:", selectedFile);
-            }}
-            size="lg"
-          />
-          <Button type="submit" color="blue" fullWidth disabled={loading}>
-            {loading ? "Adding Cat..." : "Add Cat"}
-          </Button>
-        </form>
-        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-      </div>
-    </div>
+        <AsyncSelect
+          label="Species"
+          value={String(speciesId)}
+          onChange={(idAsString) => setSpeciesId(Number(idAsString))}
+          size="lg"
+        >
+          {speciesList.map((species) => (
+            <Option key={species.id} value={String(species.id)}>
+              {species.name}
+            </Option>
+          ))}
+        </AsyncSelect>
+        {errors.speciesId && <p className="text-red-500 text-sm">{errors.speciesId}</p>}
+        <Input
+          label="Age"
+          type="number"
+          value={age}
+          onChange={(e) => setAge(Number(e.target.value))}
+          size="lg"
+          required
+        />
+        {errors.age && <p className="text-red-500 text-sm">{errors.age}</p>}
+        <Textarea
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          size="lg"
+          required
+        />
+        {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+        <Input
+          label="Found Date"
+          type="date"
+          value={found}
+          onChange={(e) => setFound(e.target.value)}
+          size="lg"
+          required
+        />
+        {/* File input for photo */}
+        <Input
+          label="Upload Photo"
+          type="file"
+          onChange={(e) => {
+            const selectedFile = e.target.files ? e.target.files[0] : null;
+            setFile(selectedFile);
+            console.log("Selected file:", selectedFile);
+          }}
+          size="lg"
+        />
+        <Button type="submit" color="blue" fullWidth disabled={loading}>
+          {loading ? "Adding Cat..." : "Add Cat"}
+        </Button>
+      </form>
+      {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import UserTable, { User } from './UserTable';
-import { Button, Dialog, DialogBody, DialogFooter } from '@material-tailwind/react';
+import { Button, Card, CardBody, CardFooter, Dialog } from '@material-tailwind/react';
 import AddUserForm from './AddUserForm';
 import { API_URL } from '../App';
 
@@ -50,15 +50,17 @@ const UsersDashboard: React.FC = () => {
       <Button color="blue" onClick={toggleModal} className="mt-8">
         Add New User
       </Button>
-      <Dialog open={isModalOpen} handler={toggleModal} size="lg">
-        <DialogBody>
-          <AddUserForm onUserAdded={handleUserAdded} />
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="text" color="red" onClick={toggleModal} className="mr-2">
-            Cancel
-          </Button>
-        </DialogFooter>
+      <Dialog open={isModalOpen} handler={toggleModal} size="xs" className="!max-w-[30rem] !min-w-[26rem]">
+        <Card className="mx-auto w-full !max-w-[30rem] !min-w-[26rem] px-2">
+          <CardBody className="flex flex-col gap-4">
+            <AddUserForm onUserAdded={handleUserAdded} />
+          </CardBody>
+          <CardFooter className="pt-0">
+            <Button variant="text" color="red" onClick={toggleModal} className="mr-2">
+              Cancel
+            </Button>
+          </CardFooter>
+        </Card>
       </Dialog>
     </div>
   );

@@ -69,8 +69,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onUserAdded }) => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
+        <>
                 <Typography variant="h4" color="blue-gray" className="mb-4 text-center font-semibold">
                     Add a New User
                 </Typography>
@@ -165,8 +164,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({ onUserAdded }) => {
                     </Button>
                 </form>
                 {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-            </div>
-        </div>
+            </>
     );
 };
 

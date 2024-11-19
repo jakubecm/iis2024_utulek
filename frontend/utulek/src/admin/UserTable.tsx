@@ -1,4 +1,4 @@
-import { Button, Card, Dialog, DialogBody, DialogFooter, DialogHeader, Typography } from "@material-tailwind/react";
+import { Button, Card, CardBody, CardFooter, Dialog, Typography } from "@material-tailwind/react";
 import { useState } from "react";
 import EditUserForm from "./EditUserForm";
  
@@ -116,9 +116,9 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUpdateUser }) => {
 
       {/* Edit Modal */}
       {selectedUser && (
-        <Dialog open={isEditOpen} handler={closeEditModal}>
-          <DialogHeader>Edit User</DialogHeader>
-          <DialogBody>
+      <Dialog open={isEditOpen} handler={closeEditModal} size="xs" className="!max-w-[30rem] !min-w-[26rem]">
+      <Card className="mx-auto w-full !max-w-[30rem] !min-w-[26rem] px-2">
+        <CardBody className="flex flex-col gap-4">
             <EditUserForm
               user={selectedUser}
               onModification={() => {
@@ -126,10 +126,13 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUpdateUser }) => {
                 onUpdateUser();
               }}
             />
-          </DialogBody>
-          <DialogFooter>
-            <Button color="red" onClick={closeEditModal}>Cancel</Button>
-          </DialogFooter>
+          </CardBody>
+          <CardFooter>
+            <Button variant="text" color="red" onClick={closeEditModal} className="mr-2">
+              Cancel
+            </Button>
+          </CardFooter>
+          </Card>
         </Dialog>
       )}
     </Card>
