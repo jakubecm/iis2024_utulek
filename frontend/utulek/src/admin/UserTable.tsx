@@ -1,9 +1,15 @@
 import { Button, Card, Dialog, DialogBody, DialogFooter, DialogHeader, Typography } from "@material-tailwind/react";
-import { API_URL } from "../App";
 import { useState } from "react";
 import EditUserForm from "./EditUserForm";
  
-const TABLE_HEAD = ["Role", "Username", "Full Name", "Email", "Telephone", "Specialization", "Verified", ""];
+const TABLE_HEAD = ["Username", "Full Name", "Email", "Role", "Telephone", "Specialization", "Verified", ""];
+
+const Roles: { [key: number]: string } = {
+  0: "Admin",
+  1: "Volunteer",
+  2: "Veterinarian",
+  3: "Caregiver",
+}
 
 export interface User {
   Id: number;
@@ -11,17 +17,12 @@ export interface User {
   FirstName: string;
   LastName: string;
   Email: string;
-  role: string;
+  role: number;
   Specialization?: string;
   Telephone?: string;
   verified?: boolean; 
 }
 
-// NOTES: Verified by mela za me byt ikonka misto textu
-//        Role by se mela prelozit na text
-//        Misto N/A pomlcky vycentrovane
-//        Edit tlacitko by melo neco delat (optional) (:kapp:)
-//        Sloupce by mely fitnout content
 interface UserTableProps {
   users: User[];
   onUpdateUser: () => void; // Function to handle updates
@@ -67,11 +68,6 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUpdateUser }) => {
 
             return (
               <tr key={user.Username}>
-                <td className={classes}>
-                  <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.role}
-                  </Typography>
-                </td>
                 <td className={`${classes} bg-blue-gray-50/50`}>
                   <Typography variant="small" color="blue-gray" className="font-normal">
                     {user.Username}
@@ -89,20 +85,25 @@ const UserTable: React.FC<UserTableProps> = ({ users, onUpdateUser }) => {
                 </td>
                 <td className={classes}>
                   <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.Telephone || "-"}
+                    {Roles[user.role]}
                   </Typography>
                 </td>
                 <td className={`${classes} bg-blue-gray-50/50`}>
                   <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.Specialization || "-"}
+                    {user.Telephone || "-"}
                   </Typography>
                 </td>
                 <td className={classes}>
                   <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.verified && (user.verified ? "Yes" : "No") || "-" }
+                    {user.Specialization || "-"}
                   </Typography>
                 </td>
                 <td className={`${classes} bg-blue-gray-50/50`}>
+                  <Typography variant="small" color="blue-gray" className="font-normal">
+                    {user.verified && (user.verified ? "Yes" : "No") || "-" }
+                  </Typography>
+                </td>
+                <td className={classes}>
                 <Button color="blue" onClick={() => openEditModal(user)}>
                     Edit
                   </Button>
