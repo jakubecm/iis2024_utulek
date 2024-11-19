@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Textarea, Typography, Select, Option } from "@material-tailwind/react";
+import { Button, Input, Textarea, Typography, Option } from "@material-tailwind/react";
 import { Species } from '../types';
 import { API_URL } from "../App";
+import AsyncSelect from './AsyncSelect';
 
 interface AddCatFormProps {
   onCatAdded: (cat: { id: number; name: string; species_id: number; age: number; description: string; found: string }) => void;
@@ -127,25 +128,20 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
             size="lg"
           />
-          <Select
+          <AsyncSelect
             label="Species"
-            value={speciesId ? String(speciesId) : ""}
-            onChange={(value) => setSpeciesId(Number(value))}
-            required
+            value={String(speciesId)}
+            onChange={(idAsString) => setSpeciesId(Number(idAsString))}
             size="lg"
-          >
-            <Option value="" disabled>
-              Choose species
-            </Option>
+            >
             {speciesList.map((species) => (
               <Option key={species.id} value={String(species.id)}>
                 {species.name}
               </Option>
             ))}
-          </Select>
+          </AsyncSelect>
           <Input
             label="Age"
             type="number"
