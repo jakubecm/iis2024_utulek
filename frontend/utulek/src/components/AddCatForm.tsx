@@ -18,6 +18,8 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [speciesList, setSpeciesList] = useState<Species[]>([]);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
 
   // Fetch species list from the backend when the component mounts
   useEffect(() => {
@@ -64,6 +66,20 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    const validationErrors: { [key: string]: string } = {};
+
+    if (!speciesId) validationErrors.speciesId = "Species is required.";
+    if (age === '' || age < 0 || age > 40) validationErrors.age = "Age must be a value between 0 and 40.";
+    if (description.trim().length < 10)
+      validationErrors.description = "Description must be at least 10 characters.";
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length) {
+      setLoading(false);
+      return;
+    }
   
     try {
       // Prepare data for submission
@@ -129,7 +145,9 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             size="lg"
+            required
           />
+
           <AsyncSelect
             label="Species"
             value={String(speciesId)}
@@ -142,25 +160,31 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
               </Option>
             ))}
           </AsyncSelect>
+          {errors.speciesId && <p className="text-red-500 text-sm">{errors.speciesId}</p>}
           <Input
             label="Age"
             type="number"
             value={age}
             onChange={(e) => setAge(Number(e.target.value))}
             size="lg"
+            required
           />
+          {errors.age && <p className="text-red-500 text-sm">{errors.age}</p>}
           <Textarea
             label="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             size="lg"
+            required
           />
+          {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
           <Input
             label="Found Date"
             type="date"
             value={found}
             onChange={(e) => setFound(e.target.value)}
             size="lg"
+            required
           />
           {/* File input for photo */}
           <Input
