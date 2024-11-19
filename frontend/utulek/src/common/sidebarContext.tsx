@@ -32,16 +32,16 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
   console.log("role:", role);
   
   // Define user-specific sidebar data
-  const userSidebarData: SidebarItem[] = [
+  const volunteerSidebarData: SidebarItem[] = [
     {
       label: 'Home',
       icon: <InboxIcon className="h-5 w-5" />,
       route: '/',
     },
     {
-      label: 'Macicky',
+      label: 'Reservations',
       icon: <InboxIcon className="h-5 w-5" />,
-      route: '/inbox',
+      route: '/reservations',
     },
     {
       label: 'Settings',
@@ -116,7 +116,12 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       label: 'Health Records',
       icon: <ShoppingBagIcon className="h-5 w-5" />,
       route: '/vets/healthrecords',
-    }
+    },
+    {
+      label: 'Reservation Requests',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/caregiver/reservations',
+    },
   ];
 
   const vetsSidebarData: SidebarItem[] = [
@@ -131,20 +136,22 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
   const sidebarData = React.useMemo(() => {
     switch (role) {
       case Role.ADMIN:
-        return [...adminSidebarData, ...userSidebarData, ...caregiverSidebarData];
+        return [...adminSidebarData, ...caregiverSidebarData, ...volunteerSidebarData];
       case Role.CAREGIVER:
-        return caregiverSidebarData;
-      case Role.USER:
-        return userSidebarData;
+        return [...caregiverSidebarData, ...volunteerSidebarData];
+      case Role.VOLUNTEER:
+        return volunteerSidebarData;
       case Role.VETS:
-        return [...vetsSidebarData, ...userSidebarData];
+        return [...vetsSidebarData, ...volunteerSidebarData];
       default:
         return sidebarUnauthData;
     }
   }, [role]);
 
+  const value = React.useMemo(() => ({ items: sidebarData }), [sidebarData]);
+
   return (
-    <SidebarContext.Provider value={{ items: sidebarData }}>
+    <SidebarContext.Provider value={value}>
       {children}
     </SidebarContext.Provider>
   );

@@ -10,6 +10,8 @@ import UsersDashboard from './admin/UsersDashboard';
 import SpeciesDashboard from './caregiver/SpeciesDashboard';
 import HealthRecords from './vets/HealthRecords';
 import { Role } from './auth/jwt';
+import Reservations from './common/Reservations';
+import ReservationRequests from './caregiver/ReservationRequests';
 
 export const API_URL = "http://127.0.0.1:5000";
 
@@ -26,6 +28,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<AuthForm />} />
                 <Route path="/logout" element={<Logout />} />
+                <Route path="/reservations" element={<Reservations />} />
 
                 {/* Protected routes */}
                 <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN]} />}>
@@ -33,6 +36,9 @@ function App() {
                 </Route>
                 <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
                   <Route path="/caregiver/species" element={<SpeciesDashboard />} />
+                </Route>
+                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
+                  <Route path="/caregiver/reservations" element={<ReservationRequests />} />
                 </Route>
                 <Route element={<ProtectedRoute requiredRoles={[Role.VETS]} />}>
                   <Route path="/vets/HealthRecords" element={<HealthRecords />} />
