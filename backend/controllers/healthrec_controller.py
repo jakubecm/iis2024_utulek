@@ -45,7 +45,7 @@ class HealthRecordList(Resource):
         # Fetch health records with joined vet info
         health_records = (
             db.session.query(HealthRecord, User)
-            .join(User, HealthRecord.VetId == User.Id)  # Join with the User table
+            .join(User, HealthRecord.UserId == User.Id)  # Join with the User table
             .filter(HealthRecord.CatId == cat_id)
             .all()
         )
@@ -122,7 +122,7 @@ class HealthRecordList(Resource):
             CatId = cat_id,
             Date = args['date'],
             Description = args['description'],
-            VetId = current_user['user_id']
+            UserId = current_user['user_id']
         )
 
         db.session.add(new_health_record)
@@ -171,7 +171,7 @@ class HealthRecordById(Resource):
                 'cat_id': health_record.CatId,
                 'date': health_record.Date.strftime('%Y-%m-%d'),
                 'description': health_record.Description,
-                'vet_id': health_record.VetId
+                'vet_id': health_record.UserId
             }
             return data, 200
         else:
@@ -242,7 +242,8 @@ class HealthRecordById(Resource):
             health_record.CatId = data['cat_id']
             health_record.Date = args['date']
             health_record.Description = args['description']
-            health_record.VetId = current_user['user_id']
+            if current_user['role'] == Roles.VETS.value:
+                health_record.UserId = current_user['user_id']
 
             db.session.commit()
             return {"msg": "Health record updated successfully"}, 200

@@ -55,7 +55,7 @@ CREATE TABLE utulek.HealthRecords (
     "CatId"       BIGINT          NOT NULL,
     "Date"        DATE            NOT NULL,
     "Description" VARCHAR(200)    NOT NULL,
-    "VetId"       BIGINT          NOT NULL,
+    "UserId"       BIGINT          NOT NULL,
     PRIMARY KEY ("Id")
 );
 
@@ -104,7 +104,7 @@ ALTER TABLE utulek.HealthRecords
     ADD CONSTRAINT FK_HealthRecordsCats FOREIGN KEY ("CatId") REFERENCES utulek.Cats("Id");
 
 ALTER TABLE utulek.HealthRecords
-    ADD CONSTRAINT FK_HealthRecordsVets FOREIGN KEY ("VetId") REFERENCES utulek.Vets("UserId");
+    ADD CONSTRAINT FK_HealthRecordsVets FOREIGN KEY ("UserId") REFERENCES utulek.Users("Id");
 
 ALTER TABLE utulek.ExaminationRequests
     ADD CONSTRAINT FK_ExaminationRequestsCats FOREIGN KEY ("CatId") REFERENCES utulek.Cats("Id");
