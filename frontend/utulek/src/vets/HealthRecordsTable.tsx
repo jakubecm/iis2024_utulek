@@ -58,7 +58,7 @@ const HealthRecordsTable: React.FC<HealthRecordsTableProps> = ({
                 </Typography>
               </td>
               <td className="p-4 border-b border-blue-gray-50">
-                {role === Role.VETS && (
+                {(role === Role.VETS || role === Role.ADMIN) && (
                   <Button color="blue" onClick={() => onEdit(record)}>
                     Edit
                   </Button>

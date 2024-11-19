@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Input, Textarea, Typography, Select, Option } from "@material-tailwind/react";
 import { API_URL } from "../App";
 import { HealthRecord } from "../types";
+import AsyncSelect from '../components/AsyncSelect';
 
 interface Cat {
   id: number;
@@ -80,29 +81,24 @@ const EditHealthRecordForm: React.FC<EditHealthRecordFormProps> = ({ record, onS
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
+      <>
         <Typography variant="h4" color="blue-gray" className="mb-4 text-center font-semibold">
           Edit Health Record
         </Typography>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Select Cat */}
-          <Select
+          <AsyncSelect
             label="Select Cat"
             onChange={(value) => setSelectedCatId(Number(value))}
             value={selectedCatId ? String(selectedCatId) : ""}
-            required
             disabled
           >
-            <Option value="" disabled>
-              Choose Cat
-            </Option>
             {cats.map((cat) => (
               <Option key={cat.id} value={String(cat.id)}>
                 {cat.name}
               </Option>
             ))}
-          </Select>
+          </AsyncSelect>
 
           {/* Date */}
           <Input
@@ -134,8 +130,7 @@ const EditHealthRecordForm: React.FC<EditHealthRecordFormProps> = ({ record, onS
         <Button color="red" variant="text" fullWidth onClick={onClose} className="mt-4">
           Cancel
         </Button>
-      </div>
-    </div>
+    </>
   );
 };
 

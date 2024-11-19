@@ -6,6 +6,9 @@ import HealthRecordsTable from "./HealthRecordsTable";
 import AddHealthRecordForm from "./AddHealthRecordForm";
 import EditHealthRecordForm from "./EditHealthRecordForm";
 import { HealthRecord } from "../types";
+import { useAuth } from "../auth/AuthContext";
+import { Role } from "../auth/jwt";
+import AsyncSelect from '../components/AsyncSelect';
 
 interface Cat {
     id: number;
@@ -21,6 +24,7 @@ const HealthRecordsTab: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRecord, setEditingRecord] = useState<HealthRecord | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const { role } = useAuth();
 
     const location = useLocation();
 
@@ -43,6 +47,7 @@ const HealthRecordsTab: React.FC = () => {
         try {
             const response = await fetch(`${API_URL}/cats`);
             if (!response.ok) throw new Error("Failed to fetch cats");
+
             const data = await response.json();
             setCats(data);
         } catch (err) {
@@ -59,8 +64,8 @@ const HealthRecordsTab: React.FC = () => {
         const catId = params.get("cat_id");
 
         if (catId && cats.length > 0) {
-        const selectedCat = cats.find((cat) => cat.id === Number(catId));
-        if (selectedCat) setSelectedCat(selectedCat.name);
+            const selectedCat = cats.find((cat) => cat.id === Number(catId));
+            if (selectedCat) setSelectedCat(selectedCat.name);
         }
     }, [location.search, cats]);
 
@@ -75,19 +80,21 @@ const HealthRecordsTab: React.FC = () => {
         setError(null);
 
         try {
-        const selectedCatId = cats.find((cat) => cat.name === selectedCat)?.id;
-        if (!selectedCatId) throw new Error("Invalid cat selection");
+            const selectedCatId = cats.find((cat) => cat.name === selectedCat)?.id;
+            if (!selectedCatId) throw new Error("Invalid cat selection");
 
-        const response = await fetch(`${API_URL}/healthrecords/${selectedCatId}`);
-        if (!response.ok) throw new Error("Failed to fetch health records");
+            const response = await fetch(`${API_URL}/healthrecords/${selectedCatId}`);
+            if (!response.ok) throw new Error("Failed to fetch health records");
 
-        const data = await response.json();
-        setHealthRecords(data);
+            const data = await response.json();
+            setHealthRecords(data);
+
         } catch (err) {
-        console.error(err);
-        setError("Failed to fetch health records");
+            console.error(err);
+            setError("Failed to fetch health records");
+
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -104,23 +111,25 @@ const HealthRecordsTab: React.FC = () => {
         {/* Filter and Add Record Section */}
         <div className="flex items-center gap-4 mb-4">
             {/* Dropdown to select a cat */}
-            <Select
-            label="Filter by Cat"
-            onChange={(value) => setSelectedCat(value!)}
-            value={selectedCat}
-            className="flex-grow"
-            >
-            {cats.map((cat) => (
-                <Option key={cat.id} value={cat.name}>
-                {cat.name}
-                </Option>
-            ))}
-            </Select>
+            <AsyncSelect
+                label="Filter by Cat"
+                onChange={(value) => setSelectedCat(value!)}
+                value={selectedCat}
+                className="flex-grow"
+                >
+                {cats.map((cat) => (
+                    <Option key={cat.id} value={cat.name}>
+                    {cat.name}
+                    </Option>
+                ))}
+            </AsyncSelect>
 
             {/* Add Health Record Button */}
-            <Button color="green" onClick={openModal}>
-            Add Health Record
-            </Button>
+            {(role === Role.VETS || role === Role.ADMIN) && (
+                <Button color="green" onClick={openModal}>
+                    Add Health Record
+                </Button>
+            )}
         </div>
 
         {/* Health Records Table */}
