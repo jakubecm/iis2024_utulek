@@ -37,8 +37,8 @@ class AvailableSlotList(Resource):
             {
                 'id': available_slot.Id,
                 'cat_id': available_slot.CatId,
-                'start_time': available_slot.StartTime,
-                'end_time': available_slot.EndTime,
+                'start_time': available_slot.StartTime.strftime('%Y-%m-%d %H:%M'),
+                'end_time': available_slot.EndTime.strftime('%Y-%m-%d %H:%M'),
             }
             for available_slot in available_slots
         ]
