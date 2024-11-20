@@ -6,3 +6,10 @@ class Roles(Enum):
     VOLUNTEER = 1
     VETS = 2
     CAREGIVER = 3
+
+class Status(Enum):
+    PENDING = 0
+    APPROVED = 1
+    REJECTED = 2
+    SCHEDULED = 3
+    COMPLETED = 4

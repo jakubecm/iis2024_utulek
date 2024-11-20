@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Textarea, Typography, Option, Card, CardBody } from "@material-tailwind/react";
+import { Button, Input, Textarea, Typography, Option } from "@material-tailwind/react";
 import { Species } from '../types';
 import { API_URL } from "../App";
 import AsyncSelect from './AsyncSelect';
@@ -189,10 +189,15 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
         <Input
           label="Upload Photo"
           type="file"
+          accept="image/*"
           onChange={(e) => {
             const selectedFile = e.target.files ? e.target.files[0] : null;
+            if (selectedFile && !selectedFile.type.startsWith("image/")) {
+              e.target.value = ''; // Clear file input
+              setFile(null); // Reset file selection if not an image
+              return;
+            }
             setFile(selectedFile);
-            console.log("Selected file:", selectedFile);
           }}
           size="lg"
         />

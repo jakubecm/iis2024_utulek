@@ -12,6 +12,7 @@ class User(db.Model):
     LastName = db.Column(db.String(30), nullable=False)
     Email = db.Column(db.String(50), unique=True, nullable=False)
     role = db.Column(db.SmallInteger, nullable=False)
+    volunteer = db.relationship('Volunteer', backref='user', uselist=False, lazy=True)
 
     # Relationships with cascade delete
     veterinarian = relationship("Veterinarian", backref="user", cascade="all, delete-orphan", uselist=False)

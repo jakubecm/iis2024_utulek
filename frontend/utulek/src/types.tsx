@@ -20,3 +20,14 @@ export interface HealthRecord {
     description: string;
     vet_name: string;
   }
+
+export interface ExaminationRequest {
+    id: number;
+    cat_id: number;
+    caregiver_id: number;
+    cat_name: string;
+    caregiver_name: string;
+    request_date: string;
+    description: string;
+    status: number;
+  }

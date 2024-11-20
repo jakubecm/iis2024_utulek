@@ -14,7 +14,7 @@ from controllers.examination_controller import ExaminationRequestList, Examinati
 from controllers.healthrec_controller import HealthRecordList,  HealthRecordById
 from controllers.availableslot_controller import AvailableSlotList, AvailableSlotById
 from controllers.reservationrequest_controller import ReservationList, ReservationById
-from controllers.users_controller import UserById, UserList
+from controllers.users_controller import UserById, UserList, UnverifiedVolunteers
 
 # DB import
 from models.database import db
@@ -77,3 +77,5 @@ api.add_resource(ReservationById, '/reservationrequests/<int:reservation_request
 
 api.add_resource(UserList, '/admin/users') 
 api.add_resource(UserById, '/admin/users/<int:user_id>')
+
+api.add_resource(UnverifiedVolunteers, '/caregiver/unverified_volunteers')

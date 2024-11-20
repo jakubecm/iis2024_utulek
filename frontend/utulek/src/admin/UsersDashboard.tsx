@@ -53,23 +53,23 @@ const UsersDashboard: React.FC = () => {
       </h1>
       <Tabs value="admin">
         <TabsHeader>
-          <Tab key="admin" value="admin">Admins</Tab>
-          <Tab key="volunteer" value="volunteer">Volunteers</Tab>
-          <Tab key="veterinarian" value="veterinarian">Veterinarians</Tab>
-          <Tab key="caregiver" value="caregiver">Caregivers</Tab>
+          <Tab key="admin" value="admin" className='font-bold'>Admins</Tab>
+          <Tab key="volunteer" value="volunteer" className='font-bold'>Volunteers</Tab>
+          <Tab key="veterinarian" value="veterinarian" className='font-bold'>Veterinarians</Tab>
+          <Tab key="caregiver" value="caregiver" className='font-bold'>Caregivers</Tab>
         </TabsHeader>
         <TabsBody>
           <TabPanel key="admin" value="admin">
-            <UserTable users={adminUsers} onUpdateUser={handleUserAdded} />
+            <UserTable users={adminUsers} role="admin" onUpdateUser={handleUserAdded} />
           </TabPanel>
           <TabPanel key="volunteer" value="volunteer">
-            <UserTable users={volunteerUsers} onUpdateUser={handleUserAdded} />
+            <UserTable users={volunteerUsers} role="volunteer" onUpdateUser={handleUserAdded} />
           </TabPanel>
           <TabPanel key="veterinarian" value="veterinarian">
-            <UserTable users={veterinarianUsers} onUpdateUser={handleUserAdded} />
+            <UserTable users={veterinarianUsers} role="veterinarian" onUpdateUser={handleUserAdded} />
           </TabPanel>
           <TabPanel key="caregiver" value="caregiver">
-            <UserTable users={caregiverUsers} onUpdateUser={handleUserAdded} />
+            <UserTable users={caregiverUsers} role="caregiver" onUpdateUser={handleUserAdded} />
           </TabPanel>
         </TabsBody>
       </Tabs>

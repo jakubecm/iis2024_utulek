@@ -319,4 +319,55 @@ class UserList(Resource):
 
         db.session.commit()
         return {"msg": "User created successfully"}, 201
-    
+
+class UnverifiedVolunteers(Resource):
+    @swag_from({
+        'tags': ['Admin'],
+        'summary': 'Retrieve all unverified volunteers (Admin and caregiver only)',
+        'responses': {
+            200: {
+                'description': 'List of all unverified volunteers retrieved successfully',
+                'examples': {
+                    'application/json': [
+                        {
+                            'Id': 1,
+                            'Username': 'johndoe',
+                            'FirstName': 'John',
+                            'LastName': 'Doe',
+                            'Email': 'johndoe@example.com',
+                            'role': 1,
+                            'verified': False
+                        },
+                    ]
+                }
+            },
+            403: {
+                'description': 'Admin access required',
+                'examples': {
+                    'application/json': {'msg': 'Admin access required'}
+                }
+            }
+        }
+    })
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+            return {"msg": "Admin or caregiver access required"}, 403
+
+        volunteers = User.query.join(Volunteer, User.Id == Volunteer.UserId).filter(Volunteer.verified == False).all()
+        volunteers_data = []
+
+        for volunteer in volunteers:
+            volunteer_data = {
+                "Id": volunteer.Id,
+                "Username": volunteer.Username,
+                "FirstName": volunteer.FirstName,
+                "LastName": volunteer.LastName,
+                "Email": volunteer.Email,
+                "role": volunteer.role,
+                "verified": volunteer.volunteer.verified
+            }
+            volunteers_data.append(volunteer_data)
+
+        return volunteers_data, 200
