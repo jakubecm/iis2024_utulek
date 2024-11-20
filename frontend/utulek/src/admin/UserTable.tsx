@@ -7,7 +7,7 @@ const Roles: { [key: number]: string } = {
   1: "Volunteer",
   2: "Veterinarian",
   3: "Caregiver",
-}
+};
 
 export interface User {
   Id: number;
@@ -18,7 +18,7 @@ export interface User {
   role: number;
   Specialization?: string;
   Telephone?: string;
-  verified?: boolean; 
+  verified?: boolean;
 }
 
 interface UserTableProps {
@@ -29,7 +29,7 @@ interface UserTableProps {
 
 const UserTable: React.FC<UserTableProps> = ({ users, role, onUpdateUser }) => {
   type RoleType = keyof typeof columnConfig;
-  
+
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -47,9 +47,9 @@ const UserTable: React.FC<UserTableProps> = ({ users, role, onUpdateUser }) => {
     admin: ["Username", "Full Name", "Email", "Role", ""],
     veterinarian: ["Username", "Full Name", "Email", "Role", "Specialization", "Telephone", ""],
     caregiver: ["Username", "Full Name", "Email", "Role", ""],
-    volunteer: ["Username", "Full Name", "Email", "Verified", ""]
+    volunteer: ["Username", "Full Name", "Email", "Verified", ""],
   };
-  
+
   const displayColumns = columnConfig[role as RoleType];
 
   return (
@@ -97,17 +97,17 @@ const UserTable: React.FC<UserTableProps> = ({ users, role, onUpdateUser }) => {
                   </Typography>
                 </td>
               )}
-              {displayColumns.includes("Telephone") && (
-                <td className="p-2 border-b border-blue-gray-50">
-                  <Typography variant="small" color="blue-gray" className="font-normal">
-                    {user.Telephone || "-"}
-                  </Typography>
-                </td>
-              )}
               {displayColumns.includes("Specialization") && (
                 <td className="p-2 border-b border-blue-gray-50">
                   <Typography variant="small" color="blue-gray" className="font-normal">
                     {user.Specialization || "-"}
+                  </Typography>
+                </td>
+              )}
+              {displayColumns.includes("Telephone") && (
+                <td className="p-2 border-b border-blue-gray-50">
+                  <Typography variant="small" color="blue-gray" className="font-normal">
+                    {user.Telephone || "-"}
                   </Typography>
                 </td>
               )}
@@ -118,9 +118,11 @@ const UserTable: React.FC<UserTableProps> = ({ users, role, onUpdateUser }) => {
                   </Typography>
                 </td>
               )}
-                <td className="p-2 border-b border-blue-gray-50 text-right">
-                <Button color="blue" onClick={() => openEditModal(user)}>Edit</Button>
-                </td>
+              <td className="p-2 border-b border-blue-gray-50 text-right">
+                <Button color="blue" onClick={() => openEditModal(user)}>
+                  Edit
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -151,4 +153,3 @@ const UserTable: React.FC<UserTableProps> = ({ users, role, onUpdateUser }) => {
 };
 
 export default UserTable;
-
