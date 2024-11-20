@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserTable, { User } from './UserTable';
-import { Button, Card, CardBody, CardFooter, Dialog } from '@material-tailwind/react';
+import { Button, Card, CardBody, CardFooter, Dialog, Tabs, TabsHeader, TabsBody, Tab, TabPanel} from '@material-tailwind/react';
 import AddUserForm from './AddUserForm';
 import { API_URL } from '../App';
 
@@ -37,16 +37,42 @@ const UsersDashboard: React.FC = () => {
     fetchUsers();
   };
 
-  useMemo(() => {
+  useEffect(() => {
     fetchUsers();
   }, []);
 
+  const adminUsers = users.filter((user) => user.role === 0);
+  const volunteerUsers = users.filter((user) => user.role === 1);
+  const veterinarianUsers = users.filter((user) => user.role === 2);
+  const caregiverUsers = users.filter((user) => user.role === 3);
+  
   return (
     <div>
       <h1 className="font-bold leading-snug tracking-tight text-slate-800 my-6 w-full text-2xl lg:max-w-3xl lg:text-5xl">
         Users Dashboard
       </h1>
-      <UserTable users={users} onUpdateUser={handleUserAdded} />
+      <Tabs value="admin">
+        <TabsHeader>
+          <Tab key="admin" value="admin">Admins</Tab>
+          <Tab key="volunteer" value="volunteer">Volunteers</Tab>
+          <Tab key="veterinarian" value="veterinarian">Veterinarians</Tab>
+          <Tab key="caregiver" value="caregiver">Caregivers</Tab>
+        </TabsHeader>
+        <TabsBody>
+          <TabPanel key="admin" value="admin">
+            <UserTable users={adminUsers} onUpdateUser={handleUserAdded} />
+          </TabPanel>
+          <TabPanel key="volunteer" value="volunteer">
+            <UserTable users={volunteerUsers} onUpdateUser={handleUserAdded} />
+          </TabPanel>
+          <TabPanel key="veterinarian" value="veterinarian">
+            <UserTable users={veterinarianUsers} onUpdateUser={handleUserAdded} />
+          </TabPanel>
+          <TabPanel key="caregiver" value="caregiver">
+            <UserTable users={caregiverUsers} onUpdateUser={handleUserAdded} />
+          </TabPanel>
+        </TabsBody>
+      </Tabs>
       <Button color="blue" onClick={toggleModal} className="mt-8">
         Add New User
       </Button>
@@ -65,5 +91,6 @@ const UsersDashboard: React.FC = () => {
     </div>
   );
 };
+
 
 export default UsersDashboard;
