@@ -42,7 +42,7 @@ function App() {
                 <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
                   <Route path="/caregiver/reservations" element={<ReservationRequests />} />
                 </Route>
-                <Route element={<ProtectedRoute requiredRoles={[Role.VETS]} />}>
+                <Route element={<ProtectedRoute requiredRoles={[Role.VETS, Role.ADMIN, Role.CAREGIVER]} />}>
                   <Route path="/vets/HealthRecords" element={<HealthRecords />} />
                 </Route>
                 <Route element={<ProtectedRoute requiredRoles={[Role.VETS, Role.ADMIN, Role.CAREGIVER]} />}>

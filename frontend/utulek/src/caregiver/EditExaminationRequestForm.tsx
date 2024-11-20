@@ -64,6 +64,24 @@ const EditExaminationRequestForm: React.FC<EditExaminationRequestFormProps> = ({
         }
     }, [role, request.cat_id, request.cat_name]);
 
+    const handleDelete = async () => {
+        try {
+            const response = await fetch(`${API_URL}/examinationrequests/${request.id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+    
+            if (!response.ok) throw new Error("Failed to delete examination request");
+    
+            onSubmit();
+            onClose();
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to delete examination request");
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -149,15 +167,19 @@ const EditExaminationRequestForm: React.FC<EditExaminationRequestFormProps> = ({
             {/* Error Message */}
             {error && <Typography color="red">{error}</Typography>}
 
-            {/* Submit Button */}
-            <Button type="submit" color="blue" fullWidth disabled={loading}>
-                {loading ? "Updating..." : "Update"}
-            </Button>
+            <div className="flex justify-between">
+                {/* Submit Button */}
+                <Button type="submit" color="blue" disabled={loading}>
+                    {loading ? "Updating..." : "Update"}
+                </Button>
 
-            {/* Cancel Button */}
-            <Button variant="text" color="red" fullWidth onClick={onClose}>
-                Cancel
-            </Button>
+                {/* Delete Button */}
+                {((role === Role.CAREGIVER && request.status === 0) || role === Role.ADMIN) && (
+                    <Button color="red" variant="text" onClick={handleDelete}>
+                        Delete
+                    </Button>
+                )}
+            </div>
         </form>
     );
 };

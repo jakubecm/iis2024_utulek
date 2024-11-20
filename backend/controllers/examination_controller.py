@@ -265,8 +265,12 @@ class ExaminationRequestById(Resource):
             }
         }
     })
-    # Todo: fix delete endpoint
+    @jwt_required()
     def delete(self, examination_request_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
+            return {'msg': 'Unauthorized'}, 401
+        
         examination_request = ExaminationRequest.query.filter_by(Id=examination_request_id).first()
         if examination_request:
             db.session.delete(examination_request)
