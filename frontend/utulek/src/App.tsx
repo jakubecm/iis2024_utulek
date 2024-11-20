@@ -13,6 +13,7 @@ import { Role } from './auth/jwt';
 import Reservations from './common/Reservations';
 import ReservationRequests from './caregiver/ReservationRequests';
 import ExaminationRequests from './caregiver/ExaminationRequests';
+import VolunteerDashboard from './caregiver/VolunteerDashboard';
 
 export const API_URL = "http://127.0.0.1:5000";
 
@@ -46,6 +47,9 @@ function App() {
                 </Route>
                 <Route element={<ProtectedRoute requiredRoles={[Role.VETS, Role.ADMIN, Role.CAREGIVER]} />}>
                   <Route path="/caregiver/examination_requests" element={<ExaminationRequests />} />
+                </Route>
+                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
+                  <Route path="/caregiver/volunteer_validation" element={<VolunteerDashboard />} />
                 </Route>
               </Routes>
             </div>
