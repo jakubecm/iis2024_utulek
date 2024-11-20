@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Input, Textarea, Typography, Select, Option } from "@material-tailwind/react";
+import { Button, Input, Textarea, Typography, Option } from "@material-tailwind/react";
 import { Cat } from '../types';
 import { Species } from '../types';
 import { API_URL } from "../App";
@@ -21,6 +21,7 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [speciesList, setSpeciesList] = useState<Species[]>([]);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const fetchSpecies = async () => {
@@ -64,6 +65,20 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
     setLoading(true);
     setError(null);
 
+    const validationErrors: { [key: string]: string } = {};
+
+    if (!speciesId) validationErrors.speciesId = "Species is required.";
+    if (age === '' || age < 0 || age > 40) validationErrors.age = "Age must be a value between 0 and 40.";
+    if (description.trim().length < 10)
+      validationErrors.description = "Description must be at least 10 characters.";
+
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const updatedCatData = {
         name,
@@ -101,8 +116,7 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
+      <>
         <Typography variant="h4" color="blue-gray" className="mb-4 text-center font-semibold">
           Edit Cat Details
         </Typography>
@@ -127,6 +141,7 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
               </Option>
             ))}
           </AsyncSelect>
+          {errors.speciesId && <p className="text-red-500 text-sm">{errors.speciesId}</p>}
           <Input
             label="Age"
             type="number"
@@ -134,12 +149,14 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
             onChange={(e) => setAge(Number(e.target.value))}
             size="lg"
           />
+          {errors.age && <p className="text-red-500 text-sm">{errors.age}</p>}
           <Textarea
             label="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             size="lg"
           />
+          {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
           <Input
             label="Found Date"
             type="date"
@@ -147,13 +164,19 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
             onChange={(e) => setFound(e.target.value)}
             size="lg"
           />
+          {/* File input for photo */}
           <Input
-            label="Upload New Photo"
+            label="Upload Photo"
             type="file"
+            accept="image/*"
             onChange={(e) => {
               const selectedFile = e.target.files ? e.target.files[0] : null;
+              if (selectedFile && !selectedFile.type.startsWith("image/")) {
+                e.target.value = ''; // Clear file input
+                setFile(null); // Reset file selection if not an image
+                return;
+              }
               setFile(selectedFile);
-              console.log("Selected file:", selectedFile);
             }}
             size="lg"
           />
@@ -165,8 +188,7 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
         <Button color="red" variant="text" fullWidth onClick={onClose} className="mt-4">
           Cancel
         </Button>
-      </div>
-    </div>
+      </>
   );
 };
 
