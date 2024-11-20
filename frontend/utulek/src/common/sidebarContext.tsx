@@ -122,6 +122,11 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       icon: <InboxIcon className="h-5 w-5" />,
       route: '/caregiver/reservations',
     },
+    {
+      label: 'Examination Requests',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/caregiver/examination_requests',
+    },
   ];
 
   const vetsSidebarData: SidebarItem[] = [
@@ -129,7 +134,12 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       label: 'Health Records',
       icon: <ShoppingBagIcon className="h-5 w-5" />,
       route: '/vets/healthrecords',
-    }
+    },
+    {
+      label: 'Examination Requests',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/caregiver/examination_requests',
+    },
   ];
 
   // Select data based on role
