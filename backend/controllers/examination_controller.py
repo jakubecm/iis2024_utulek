@@ -54,6 +54,7 @@ class ExaminationRequestList(Resource):
             caregiver = User.query.filter_by(Id=req.CaregiverId).first()
             final_requests.append({
                 'id': req.Id,
+                'cat_id': req.CatId,
                 'cat_name': cat.Name if cat else "Unknown Cat",
                 'caregiver_name': f"{caregiver.FirstName} {caregiver.LastName}" if caregiver else "Unknown Caregiver",
                 'request_date': req.RequestDate.strftime('%Y-%m-%d'),
