@@ -1,5 +1,5 @@
 from flasgger import swag_from
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 from models.AvailableSlot import AvailableSlot
@@ -45,15 +45,19 @@ class AvailableSlotList(Resource):
         if current_user['role'] not in allowed_roles:
             return make_response(jsonify({'msg': 'Unauthorized user'}), 401)
         
-        available_slots = AvailableSlot.query.filter_by(Status=AvailableSlotStatus.AVAILABLE.value).all()
+        if request.args.get('all') == 'true':
+            available_slots = AvailableSlot.query.all()
+        else:
+            available_slots = AvailableSlot.query.filter_by(Status=AvailableSlotStatus.AVAILABLE.value).all()
+
         available_slots_list = [
             {
-                'id': available_slot.Id,
-                'cat_id': available_slot.CatId,
-                'start_time': available_slot.StartTime.strftime('%Y-%m-%d %H:%M'),
-                'end_time': available_slot.EndTime.strftime('%Y-%m-%d %H:%M'),
+                'id': slot.Id,
+                'cat_id': slot.CatId,
+                'start_time': slot.StartTime.strftime('%Y-%m-%d %H:%M'),
+                'end_time': slot.EndTime.strftime('%Y-%m-%d %H:%M'),
             }
-            for available_slot in available_slots
+            for slot in available_slots
         ]
         return jsonify(available_slots_list)
 
