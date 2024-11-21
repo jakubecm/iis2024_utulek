@@ -41,7 +41,7 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
     {
       label: 'Reservations',
       icon: <InboxIcon className="h-5 w-5" />,
-      route: '/reservations',
+      route: '/volunteer/reservations',
     },
     {
       label: 'Settings',

@@ -183,14 +183,12 @@ class CatPhotoRetrieve(Resource):
             }
         }
     })
-    def get(self):
-        cat_id = request.args.get('cat_id', type=int)
-
-        if not cat_id:
+    def get(self, id):
+        if not id:
             return {"msg": "cat_id is required to retrieve photos"}, 400
 
         # Retrieve all photos for the specified cat ID
-        photos = CatPhotos.query.filter_by(CatId=cat_id).all()
+        photos = CatPhotos.query.filter_by(CatId=id).all()
         
         if not photos:
             return {"msg": "No photos found for this cat"}, 404

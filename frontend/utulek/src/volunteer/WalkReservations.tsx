@@ -68,15 +68,18 @@ const WalkReservations: React.FC = () => {
   // Update events whenever slots are fetched
   useEffect(() => {
     if (!loading && slots.length > 0) {
-      const cat = catList.find((cat) => cat.id === slots[0].cat_id);
-      const mappedEvents = slots.map((slot) => ({
-        id: slot.id.toString(),
-        title: cat?.name || "",
-        start: slot.start_time,
-        end: slot.end_time,
-        cat: cat,
-        slot: slot,
-      }));
+      const mappedEvents = slots.map((slot) => {
+        const cat = catList.find((cat) => cat.id === slot.cat_id);
+        return ({
+            id: slot.id.toString(),
+            title: cat?.name || "",
+            start: slot.start_time,
+            end: slot.end_time,
+            cat: cat,
+            slot: slot,
+          })
+      }
+        );
       setEvents(mappedEvents);
     }
   }, [slots, loading]);
