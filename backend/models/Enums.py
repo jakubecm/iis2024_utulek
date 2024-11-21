@@ -18,3 +18,9 @@ class Status(Enum):
 class AvailableSlotStatus(Enum):
     AVAILABLE = 0
     RESERVED  = 1
+
+class WalkRequestStatus(Enum):
+    PENDING = 0
+    APPROVED = 1
+    REJECTED = 2
+    COMPLETED = 3

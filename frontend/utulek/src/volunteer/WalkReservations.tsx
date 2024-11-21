@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Card, CardBody, CardFooter, Dialog } from '@material-tailwind/react';
+import { Button, Card, CardBody, CardFooter, Dialog, select, Option } from '@material-tailwind/react';
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react';
 import {
   CalendarEvent,
@@ -14,6 +14,7 @@ import '@schedule-x/theme-default/dist/index.css';
 import { API_URL } from '../App';
 import { Cat } from '../types';
 import InspectReservation from './InspectReservation';
+import AsyncSelect from '../components/AsyncSelect';
 
 export interface Slot {
   id: number;
@@ -29,7 +30,8 @@ const WalkReservations: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Slot>();
-  const [selectedCat, setSelectedCat] = useState<Cat>();
+  const [selectedCat, setSelectedCat] = useState<Cat | null>(null);
+  const [selectedCalendarCat, setSelectedCalendarCat] = useState<Cat>();
   const [catList, setCatList] = useState<Cat[]>([]);
 
   // Ref to always hold the latest value of slots
@@ -61,6 +63,7 @@ const WalkReservations: React.FC = () => {
     fetch(`${API_URL}/cats`)
       .then((response) => response.json())
       .then((data) => {
+        data.unshift({ id: "", name: "All Cats" });
         setCatList(data);
       })
       .catch((error) => console.error("Error fetching cats:", error));
@@ -74,21 +77,24 @@ const WalkReservations: React.FC = () => {
   // Update events whenever slots are fetched
   useEffect(() => {
     if (!loading && slots.length > 0) {
-      const mappedEvents = slots.map((slot) => {
+      const filteredSlots = selectedCat
+        ? slots.filter((slot) => slot.cat_id === selectedCat.id)
+        : slots;
+
+      const mappedEvents = filteredSlots.map((slot) => {
         const cat = catList.find((cat) => cat.id === slot.cat_id);
         return ({
-            id: slot.id.toString(),
-            title: cat?.name || "",
-            start: slot.start_time,
-            end: slot.end_time,
-            cat: cat,
-            slot: slot,
-          })
-      }
-        );
+          id: slot.id.toString(),
+          title: cat?.name || "",
+          start: slot.start_time,
+          end: slot.end_time,
+          cat: cat,
+          slot: slot,
+        });
+      });
       setEvents(mappedEvents);
     }
-  }, [slots, loading]);
+  }, [slots, loading, catList, selectedCat]);
 
   console.log('events:', events);
 
@@ -107,7 +113,7 @@ const WalkReservations: React.FC = () => {
           console.log('Event clicked:', calendarEvent);
           // Use slotsRef to access the latest slots
           setSelectedSlot(calendarEvent.slot);
-          setSelectedCat(calendarEvent.cat);
+          setSelectedCalendarCat(calendarEvent.cat);
           setIsEditOpen(true);
         },
       },
@@ -126,19 +132,44 @@ const WalkReservations: React.FC = () => {
     fetchSlots();
   };
 
+  const handleCatChange = (selectedId?: string) => {
+    if (!selectedId) {
+      setSelectedCat(null); // Show all cats
+    } else {
+      const cat = catList.find((c) => c.id.toString() === selectedId);
+      setSelectedCat(cat || null);
+    }
+  };
+
   return (
     <div>
-      <h1>ReservationRequests</h1>
+      <h1>Reservation Requests</h1>
       <div>
         {loading && <p>Loading...</p>}
         {error && <p className="text-red-500">{error}</p>}
-        {!loading && !error && <ScheduleXCalendar calendarApp={calendar} />}
+        {!loading && !error &&
+          <>
+            <div className='mt-5 mb-5'>
+              <AsyncSelect
+                label="Select a specific cat"
+                value={selectedCat?.id.toString() || ""}
+                onChange={handleCatChange}
+                size="lg"
+              >
+                {catList.map((cat) => (
+                  <Option key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </Option>
+                ))}
+              </AsyncSelect>
+            </div>
+            <ScheduleXCalendar calendarApp={calendar} />
+          </>
+        }
       </div>
-      {selectedSlot && selectedCat && (
+      {selectedSlot && selectedCalendarCat && (
         <Dialog open={isEditOpen} handler={closeEditModal} size="xs" className="!max-w-[30rem] !min-w-[26rem]">
-
-              <InspectReservation onReservationEdited={handleSlotEdited} slot={selectedSlot} cat={selectedCat} />
-
+          <InspectReservation onReservationEdited={handleSlotEdited} slot={selectedSlot} cat={selectedCalendarCat} />
         </Dialog>
       )}
     </div>

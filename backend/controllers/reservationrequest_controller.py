@@ -2,7 +2,7 @@ from flasgger import swag_from
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
-from models.Enums import AvailableSlotStatus, Roles
+from models.Enums import AvailableSlotStatus, Roles, WalkRequestStatus
 from models.ReservationRequest import ReservationRequest
 from models.AvailableSlot import AvailableSlot
 from models.database import db
@@ -109,7 +109,7 @@ class ReservationList(Resource):
             SlotId=args['SlotId'],
             VolunteerId=args['VolunteerId'],
             RequestDate=args['RequestDate'],
-            Status=0 # add an enum later
+            Status=WalkRequestStatus.PENDING.value
         )
         db.session.add(new_reservation_request)
 
