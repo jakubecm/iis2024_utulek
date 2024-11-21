@@ -34,7 +34,19 @@ const ExaminationRequestsPage: React.FC = () => {
             }
 
             const data = await response.json();
-            setRequests(data);
+
+            // Sort requests
+            const sortedRequests = data.sort((a: ExaminationRequest, b: ExaminationRequest) => {
+                if (a.status === 0 && b.status !== 0) return -1; // Pending on top
+                if (a.status !== 0 && b.status === 0) return 1;  // Pending on top
+                if (a.status === 4 && b.status !== 4) return 1;  // Completed at bottom
+                if (a.status !== 4 && b.status === 4) return -1; // Completed at bottom
+
+                // sort by date
+                return new Date(b.request_date).getTime() - new Date(a.request_date).getTime();
+            });
+
+            setRequests(sortedRequests);
 
         } catch (err) {
             console.error(err);
