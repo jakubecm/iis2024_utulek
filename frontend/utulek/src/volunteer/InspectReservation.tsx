@@ -15,6 +15,7 @@ interface InspectReservationProps {
 const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEdited, slot, cat }) => {
   const [catPhoto, setCatPhoto] = useState<string>("");
   const { userId } = useAuth();
+  const [isDefaultImageAvailable, setIsDefaultImageAvailable] = useState(true);
 
   const handleReserve = async () => {
     try {
@@ -47,6 +48,15 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
     }
   };
 
+  const defaultImageAvailable = async () => {
+    try {
+      const response = await fetch(`${API_URL}/catphotos/default-image.png`, { method: "HEAD" });
+      if (!response.ok) setIsDefaultImageAvailable(false);
+    } catch {
+      setIsDefaultImageAvailable(false);
+    }
+  };
+
   // fetch cat photo
   const fetchCatPhoto = async () => {
     try {
@@ -57,12 +67,14 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
           "Content-Type": "application/json"
         },
       });
-      if (!response.ok) throw new Error("Failed to fetch cat photo");
       const data = await response.json();
       console.log('data:', data);
-      const imageUrl = data.length > 0
-        ? `${API_URL}/${(data[0].photo_url).replace("./", "")}`
-        : `${API_URL}/catphotos/default-image.png`;
+      const imageUrl =
+        data.length > 0
+          ? `${API_URL}/${data[0].photo_url.replace("./", "")}`
+          : isDefaultImageAvailable
+          ? `${API_URL}/catphotos/default-image.png`
+          : "";
       console.log('image url:', imageUrl);
       setCatPhoto(imageUrl);
       console.log('cat photo:', data);
@@ -72,8 +84,14 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
   }
 
   useEffect(() => {
-    fetchCatPhoto();
+    defaultImageAvailable();
   }, []);
+
+  useEffect(() => {
+    if (isDefaultImageAvailable !== null) {
+      fetchCatPhoto();
+    }
+  }, [isDefaultImageAvailable]);
 
   return (
     <Card className="mx-auto w-full !max-w-[40rem] !min-w-[40rem] px-2">
@@ -117,17 +135,21 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
             </div>
           </div>
           <div>
-            <img
-              src={catPhoto}
-              alt={cat.name}
-              className="h-64 w-full object-cover rounded-t-lg"
-              onError={(e) => {
-                e.currentTarget.src = "/catphotos/default-image.png";
-              }}
-            />
+            {catPhoto ? (
+              <img
+                src={catPhoto}
+                alt={cat.name}
+                className="h-64 w-full object-cover rounded-t-lg"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none"; // Hide broken image
+                }}
+              />
+            ) : (
+              <Typography color="gray" className="text-center py-10">
+                No image available
+              </Typography>
+            )}
           </div>
-
-
         </div>
       </CardBody>
 
