@@ -1,7 +1,9 @@
 from flasgger import swag_from
 from flask import jsonify
 from flask_restful import Resource, reqparse
+from models.Enums import AvailableSlotStatus, Roles
 from models.ReservationRequest import ReservationRequest
+from models.AvailableSlot import AvailableSlot
 from models.database import db
 
 parser = reqparse.RequestParser()
@@ -86,6 +88,13 @@ class ReservationList(Resource):
             Status=0 # add an enum later
         )
         db.session.add(new_reservation_request)
+
+        # Update the slot status to reserved
+        slot = AvailableSlot.query.filter_by(Id=args['SlotId']).first()
+        if slot is None:
+            return {"msg": "Invalid data provided"}, 400
+        slot.Status = AvailableSlotStatus.RESERVED.value
+        
         db.session.commit()
         return {"msg": "Reservation request created successfully"}, 201
     

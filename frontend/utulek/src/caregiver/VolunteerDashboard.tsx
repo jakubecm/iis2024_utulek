@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { API_URL } from '../App';
+import { Role } from '../auth/jwt';
 import VolunteerTable from './VolunteerTable';
 
 const VolunteerDashboard: React.FC = () => {
@@ -33,6 +34,7 @@ const VolunteerDashboard: React.FC = () => {
         const userData = {
             ...volunteer,
             verified: true,
+            role: Role.VERIFIED_VOLUNTEER,
         };
 
         console.log(userData);

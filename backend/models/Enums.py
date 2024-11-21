@@ -6,6 +6,7 @@ class Roles(Enum):
     VOLUNTEER = 1
     VETS = 2
     CAREGIVER = 3
+    VERIFIED_VOLUNTEER = 4
 
 class Status(Enum):
     PENDING = 0
@@ -13,3 +14,7 @@ class Status(Enum):
     REJECTED = 2
     SCHEDULED = 3
     COMPLETED = 4
+
+class AvailableSlotStatus(Enum):
+    AVAILABLE = 0
+    RESERVED  = 1
