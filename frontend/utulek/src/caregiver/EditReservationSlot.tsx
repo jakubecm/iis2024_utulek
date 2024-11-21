@@ -10,12 +10,12 @@ import { Slot } from "./ReservationRequests";
 
 interface EditReservationSlotProps {
     onReservationEdited: () => void;
+    catList: Cat[];
     slot: Slot;
 }
 
-const EditReservationSlot: React.FC<EditReservationSlotProps> = ({ onReservationEdited, slot }) => {
+const EditReservationSlot: React.FC<EditReservationSlotProps> = ({ onReservationEdited, slot, catList }) => {
     const [catId, setCatId] = useState<number>(slot.cat_id);
-    const [catList, setCatList] = useState<Cat[]>([]);
     const [date, setDate] = useState<Date>(new Date(slot.start_time));
     const [startTime, setStartTime] = useState<string>(format(new Date(slot.start_time), "HH:mm")); // Extract time
     const [endTime, setEndTime] = useState<string>(format(new Date(slot.end_time), "HH:mm")); // Extract time
@@ -101,20 +101,15 @@ const EditReservationSlot: React.FC<EditReservationSlotProps> = ({ onReservation
         setEndTime(e.target.value);
     };
 
-    const fetchCats = () => {
-        fetch(`${API_URL}/cats`)
-          .then((response) => response.json())
-          .then((data) => {
-            setCatList(data);
-            console.log("Cats fetched:", data);
-            setCatId(data[0].id);
-          })
-          .catch((error) => console.error("Error fetching cats:", error));
-      };
-    
-      useEffect(() => {
-        fetchCats();
-      }, []);
+    const handleDelete = async () => {
+      const response = await fetch(`${API_URL}/availableslots/${slot.id}`, {
+          method: "DELETE",
+          credentials: "include",  // Include cookies for authentication
+      });
+
+      onReservationEdited();  // Callback to remove user from the list
+      console.log(response);
+  }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -168,9 +163,14 @@ const EditReservationSlot: React.FC<EditReservationSlotProps> = ({ onReservation
           size="md" // Add padding to accommodate the icon
         />
         </div>
-        <Button type="submit" color="blue" fullWidth disabled={loading}>
-            {loading ? "Creating..." : "Create slot"}
-        </Button>
+        <div className="flex justify-end space-x-4">
+                <Button type="button" color="red" onClick={handleDelete}>
+                    Delete
+                </Button>
+                <Button type="submit" color="blue" fullWidth disabled={loading}>
+                    {loading ? "Creating..." : "Update slot"}
+                </Button>
+            </div>
         {error && <p className="text-red-500 text-center">{error}</p>}
         </form>
     );

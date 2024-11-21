@@ -9,11 +9,11 @@ import { Cat } from "../types";
 
 interface AddReservationSlotProps {
     onReservationAdded: () => void;
+    catList: Cat[];
 }
 
-const AddReservationSlot: React.FC<AddReservationSlotProps> = ({ onReservationAdded }) => {
-    const [catId, setCatId] = useState<number | ''>('');
-    const [catList, setCatList] = useState<Cat[]>([]);
+const AddReservationSlot: React.FC<AddReservationSlotProps> = ({ onReservationAdded, catList }) => {
+    const [catId, setCatId] = useState<number>(catList[0]?.id || 0);
     const [date, setDate] = React.useState<Date>();
     const [endTime, setEndTime] = useState("");
     const [startTime, setStartTime] = useState("");
@@ -96,21 +96,6 @@ const AddReservationSlot: React.FC<AddReservationSlotProps> = ({ onReservationAd
     const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEndTime(e.target.value);
     };
-
-    const fetchCats = () => {
-        fetch(`${API_URL}/cats`)
-          .then((response) => response.json())
-          .then((data) => {
-            setCatList(data);
-            console.log("Cats fetched:", data);
-            setCatId(data[0].id);
-          })
-          .catch((error) => console.error("Error fetching cats:", error));
-      };
-    
-      useEffect(() => {
-        fetchCats();
-      }, []);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -5,6 +5,11 @@
 .sx-react-calendar-wrapper {
    width: 1200px;
    max-width: 100vw;
-   height: 800px;
+   height: 900px;
    max-height: 90vh;
  }
+
+ :root {
+  --sx-week-grid-height: 833.33px !important;
+  --sx-week-grid-hour-height: 83.3333px !important;
+}

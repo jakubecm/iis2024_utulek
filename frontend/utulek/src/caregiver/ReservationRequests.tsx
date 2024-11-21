@@ -14,6 +14,7 @@ import '@schedule-x/theme-default/dist/index.css';
 import { API_URL } from '../App';
 import AddReservationSlot from './AddReservationSlot';
 import EditReservationSlot from './EditReservationSlot';
+import { Cat } from '../types';
 
 export interface Slot {
   id: number;
@@ -30,6 +31,7 @@ const ReservationRequests: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Slot>();
+  const [catList, setCatList] = useState<Cat[]>([]);
 
   // Ref to always hold the latest value of slots
   const slotsRef = useRef<Slot[]>([]);
@@ -50,15 +52,27 @@ const ReservationRequests: React.FC = () => {
     }
   };
 
+  const fetchCats = () => {
+    fetch(`${API_URL}/cats`)
+      .then((response) => response.json())
+      .then((data) => {
+        setCatList(data);
+      })
+      .catch((error) => console.error("Error fetching cats:", error));
+  };
+
   useEffect(() => {
     fetchSlots();
+    fetchCats();
   }, []);
 
   // Update events whenever slots are fetched
   useEffect(() => {
     if (!loading && slots.length > 0) {
+      const cat = catList.find((cat) => cat.id === slots[0].cat_id);
       const mappedEvents = slots.map((slot) => ({
         id: slot.id.toString(),
+        title: cat?.name || "",
         start: slot.start_time,
         end: slot.end_time,
       }));
@@ -75,17 +89,14 @@ const ReservationRequests: React.FC = () => {
       views: [createViewDay(), createViewWeek(), createViewMonthGrid(), createViewMonthAgenda()],
       events: events, // Use dynamic events here
       dayBoundaries: {
-        start: '06:00',
-        end: '18:00',
+        start: '07:00',
+        end: '17:00',
       },
       callbacks: {
         onEventClick: (calendarEvent: CalendarEvent) => {
           console.log('Event clicked:', calendarEvent);
           // Use slotsRef to access the latest slots
           const slot = slotsRef.current.find((s) => s.id === Number(calendarEvent.id));
-          console.log('Slots (from ref):', slotsRef.current);
-          console.log('calendarEvent.id:', calendarEvent.id);
-          console.log('Slot:', slot);
           setSelectedSlot(slot);
           setIsEditOpen(true);
         },
@@ -124,7 +135,7 @@ const ReservationRequests: React.FC = () => {
       <Dialog open={isModalOpen} handler={toggleModal} size="xs" className="!max-w-[30rem] !min-w-[26rem]">
         <Card className="mx-auto w-full !max-w-[30rem] !min-w-[30rem] px-2">
           <CardBody className="flex flex-col gap-4">
-            <AddReservationSlot onReservationAdded={handleSlotAdded} />
+            <AddReservationSlot onReservationAdded={handleSlotAdded} catList={catList} />
           </CardBody>
           <CardFooter className="pt-0">
             <Button variant="text" color="red" onClick={toggleModal} className="mr-2">
@@ -137,9 +148,9 @@ const ReservationRequests: React.FC = () => {
         <Dialog open={isEditOpen} handler={closeEditModal} size="xs" className="!max-w-[30rem] !min-w-[26rem]">
           <Card className="mx-auto w-full !max-w-[30rem] !min-w-[30rem] px-2">
             <CardBody className="flex flex-col gap-4">
-              <EditReservationSlot onReservationEdited={handleSlotEdited} slot={selectedSlot} />
+              <EditReservationSlot onReservationEdited={handleSlotEdited} slot={selectedSlot} catList={catList} />
             </CardBody>
-            <CardFooter>
+            <CardFooter className="pt-0">
               <Button variant="text" color="red" onClick={closeEditModal} className="mr-2">
                 Cancel
               </Button>
