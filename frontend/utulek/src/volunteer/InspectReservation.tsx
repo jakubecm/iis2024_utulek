@@ -122,7 +122,7 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
               alt={cat.name}
               className="h-64 w-full object-cover rounded-t-lg"
               onError={(e) => {
-                e.currentTarget.src = "/static/default-image.png";
+                e.currentTarget.src = "/catphotos/default-image.png";
               }}
             />
           </div>
