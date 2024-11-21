@@ -185,9 +185,6 @@ const EditCatForm: React.FC<EditCatFormProps> = ({ cat, onCatUpdated, onClose })
           </Button>
         </form>
         {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-        <Button color="red" variant="text" fullWidth onClick={onClose} className="mt-4">
-          Cancel
-        </Button>
       </>
   );
 };

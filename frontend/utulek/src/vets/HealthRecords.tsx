@@ -83,7 +83,12 @@ const HealthRecordsTab: React.FC = () => {
             const selectedCatId = cats.find((cat) => cat.name === selectedCat)?.id;
             if (!selectedCatId) throw new Error("Invalid cat selection");
 
-            const response = await fetch(`${API_URL}/healthrecords/${selectedCatId}`);
+            const response = await fetch(`${API_URL}/healthrecords/${selectedCatId}`, {
+                method: "GET",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+            });
+            
             if (!response.ok) throw new Error("Failed to fetch health records");
 
             const data = await response.json();
