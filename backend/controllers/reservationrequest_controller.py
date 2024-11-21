@@ -354,7 +354,7 @@ class ReservationOverview(Resource):
         ).join(
             Cats, Cats.Id == AvailableSlot.CatId
         ).filter(
-            ReservationRequest.Status == Status.PENDING.value
+            ReservationRequest.Status == WalkRequestStatus.PENDING.value
         ).all()
 
         # Format the response

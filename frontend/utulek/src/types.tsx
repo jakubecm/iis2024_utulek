@@ -36,6 +36,5 @@ export interface ExaminationRequest {
     PENDING = 0,
     APPROVED = 1,
     REJECTED = 2,
-    SCHEDULED = 3,
-    COMPLETED = 4,
+    COMPLETED = 3,
   }
