@@ -18,6 +18,7 @@ const CatList: React.FC = () => {
   const { isAuthenticated, role } = useAuth();
   const [species, setSpecies] = useState<{ [key: number]: string }>({});
   const navigate = useNavigate();
+  const [isDefaultImageAvailable, setIsDefaultImageAvailable] = useState(true);
 
   const fetchCats = () => {
     fetch(`${API_URL}/cats`)
@@ -33,8 +34,21 @@ const CatList: React.FC = () => {
       .catch((error) => console.error("Error fetching cats:", error));
   };
 
+  const defaultImageAvailable = () => {
+    fetch(`${API_URL}/catphotos/default-image.png`, { method: "HEAD" })
+      .then((response) => {
+        if (!response.ok) {
+          setIsDefaultImageAvailable(false);
+        }
+      })
+      .catch(() => {
+        setIsDefaultImageAvailable(false);
+      });
+  };
+
   useEffect(() => {
     fetchCats();
+    defaultImageAvailable();
   }, []);
 
   useEffect(() => {
@@ -87,6 +101,19 @@ const CatList: React.FC = () => {
     navigate(`/vets/healthrecords?cat_id=${catId}`);
   };
 
+  const getImageUrl = (cat: Cat) => {
+    const currentPhotoIndex = photoIndices[cat.id] || 0;
+    if (cat.photos && cat.photos.length > 0) {
+      return `${API_URL}/${cat.photos[currentPhotoIndex].replace("./", "")}`;
+    }
+
+    if (isDefaultImageAvailable) {
+      return `${API_URL}/catphotos/default-image.png`;
+    }
+    
+    return ""; // No fallback image
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 py-6">
       <Typography variant="h3" color="blue-gray" className="mb-8 text-center">
@@ -94,23 +121,24 @@ const CatList: React.FC = () => {
       </Typography>
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
         {cats.map((cat) => {
-          const currentPhotoIndex = photoIndices[cat.id] || 0;
-          const imageUrl =
-            cat.photos && cat.photos.length > 0
-              ? `${API_URL}/${cat.photos[currentPhotoIndex].replace("./", "")}`
-              : `${API_URL}/catphotos/default-image.png`;
-
+          const imageUrl = getImageUrl(cat);
           return (
             <Card key={cat.id} className="w-full max-w-md mx-auto shadow-lg">
               <div className="relative">
-                <img
-                  src={imageUrl}
-                  alt={cat.name}
-                  className="h-64 w-full object-center rounded-t-lg"
-                  onError={(e) => {
-                    e.currentTarget.src = "/static/default-image.png";
-                  }}
-                />
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={cat.name}
+                    className="h-64 w-full object-cover rounded-t-lg"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none"; // Hide broken image
+                    }}
+                  />
+                ) : (
+                  <Typography color="gray" className="text-center py-10">
+                    No image available
+                  </Typography>
+                )}
                 {cat.photos && cat.photos.length > 1 && (
                   <div className="absolute top-1/2 transform -translate-y-1/2 w-full flex justify-between px-2">
                     <Button color="blue-gray" size="sm" onClick={() => handlePreviousPhoto(cat.id)}>
