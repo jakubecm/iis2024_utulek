@@ -8,4 +8,5 @@ export enum Role {
     VOLUNTEER = 1,
     VETS = 2,
     CAREGIVER = 3,
+    VERIFIED_VOLUNTEER = 4,
 }

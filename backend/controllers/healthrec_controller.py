@@ -10,7 +10,6 @@ from models.User import User
 health_record_parser = reqparse.RequestParser()
 health_record_parser.add_argument('date', type=str, required=True, help="Date cannot be blank.")
 health_record_parser.add_argument('description', type=str, required=True, help="Description cannot be blank.")
-# health_record_parser.add_argument('vet_id', type=int, required=True, help="Vet ID cannot be blank.")
 
 class HealthRecordList(Resource):
     @swag_from({

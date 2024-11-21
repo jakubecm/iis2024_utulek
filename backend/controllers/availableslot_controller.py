@@ -1,15 +1,17 @@
-import datetime
 from flasgger import swag_from
 from flask import jsonify, make_response
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restful import Resource, reqparse
 from models.AvailableSlot import AvailableSlot
+from models.Enums import AvailableSlotStatus, Roles
 from models.database import db
 
-# GET all Slots, POST Slot, PUT Slot, DELETE Slot
 available_slot_parser = reqparse.RequestParser()
 available_slot_parser.add_argument('cat_id', required=True, help="Cat ID cannot be blank.")
 available_slot_parser.add_argument('start_time', required=True, help="Start time cannot be blank.")
 available_slot_parser.add_argument('end_time', required=True, help="End time cannot be blank.")
+
+allowed_roles = [Roles.ADMIN.value, Roles.VERIFIED_VOLUNTEER.value, Roles.CAREGIVER.value]
 
 class AvailableSlotList(Resource):
     @swag_from({
@@ -28,11 +30,22 @@ class AvailableSlotList(Resource):
                         }
                     ]
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
+                }
             }
         }
     })
+    @jwt_required()
     def get(self):
-        available_slots = AvailableSlot.query.all()
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return make_response(jsonify({'msg': 'Unauthorized user'}), 401)
+        
+        available_slots = AvailableSlot.query.filter_by(Status=AvailableSlotStatus.AVAILABLE.value).all()
         available_slots_list = [
             {
                 'id': available_slot.Id,
@@ -59,6 +72,12 @@ class AvailableSlotList(Resource):
                 'examples': {
                     'application/json': {'msg': 'Bad request'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
+                }
             }
         },
         'parameters': [
@@ -88,13 +107,18 @@ class AvailableSlotList(Resource):
             }
         ]
     })
+    @jwt_required()
     def post(self):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+            return {'msg': 'Unauthorized user'}, 401
+        
         args = available_slot_parser.parse_args()
         new_slot = AvailableSlot(
-            StartTime=args['start_time'],
-            EndTime=args['end_time'],
-            CatId=args['cat_id'],
-            Status=0 # add an enum for status later
+            StartTime = args['start_time'],
+            EndTime = args['end_time'],
+            CatId  = args['cat_id'],
+            Status = AvailableSlotStatus.AVAILABLE.value
         )
         db.session.add(new_slot)
         db.session.commit()
@@ -116,6 +140,12 @@ class AvailableSlotById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Bad request'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
+                }
             }
         },
         'parameters': [
@@ -145,7 +175,12 @@ class AvailableSlotById(Resource):
             }
         ]
     })
+    @jwt_required()
     def put(self, slot_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {'msg': 'Unauthorized user'}, 401
+        
         args = available_slot_parser.parse_args()
         slot = AvailableSlot.query.filter_by(Id=slot_id).first()
         if slot is None:
@@ -153,6 +188,7 @@ class AvailableSlotById(Resource):
         slot.CatId = args['cat_id']
         slot.StartTime = args['start_time']
         slot.EndTime = args['end_time']
+
         db.session.commit()
         return {'msg': 'Available slot updated successfully'}, 200
 
@@ -171,13 +207,25 @@ class AvailableSlotById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Slot not found'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
+                }
             }
         }
     })
+    @jwt_required()
     def delete(self, slot_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+            return {'msg': 'Unauthorized user'}, 401
+        
         slot = AvailableSlot.query.filter_by(Id=slot_id).first()
         if slot is None:
             return {'msg': 'Slot not found'}, 404
         db.session.delete(slot)
         db.session.commit()
         return {'msg': 'Available slot deleted successfully'}, 200
+    
