@@ -14,7 +14,8 @@ import '@schedule-x/theme-default/dist/index.css';
 import { API_URL } from '../App';
 import AddReservationSlot from './AddReservationSlot';
 import EditReservationSlot from './EditReservationSlot';
-import { Cat } from '../types';
+import { Cat, Status } from '../types';
+import RequestTable from './RequestTable';
 
 export interface Slot {
   id: number;
@@ -56,6 +57,7 @@ const ReservationRequests: React.FC = () => {
       const data = await response.json();
       console.log('data:', data);
       setRequests(data);
+      requestsRef.current = data; // Update the ref with the fetched requests
     } catch (err) {
       setError("Failed to fetch requests");
     } finally {
@@ -65,6 +67,8 @@ const ReservationRequests: React.FC = () => {
 
   // Ref to always hold the latest value of slots
   const slotsRef = useRef<Slot[]>([]);
+  const requestsRef = useRef<ReservationRequest[]>([]);
+
 
   const fetchSlots = async () => {
     setLoading(true);
@@ -115,7 +119,7 @@ const ReservationRequests: React.FC = () => {
         title: cat?.name || "",
         start: slot.start_time,
         end: slot.end_time,
-        calendarId: request ? 'reserved' : '',
+        calendarId: request && request.status != Status.REJECTED ? 'reserved' : '',
     }});
       setEvents(mappedEvents);
     }
@@ -138,8 +142,13 @@ const ReservationRequests: React.FC = () => {
           console.log('Event clicked:', calendarEvent);
           // Use slotsRef to access the latest slots
           const slot = slotsRef.current.find((s) => s.id === Number(calendarEvent.id));
-          setSelectedSlot(slot);
-          setIsEditOpen(true);
+          const request = requestsRef.current.find((req) => slot && req.slot_id === slot.id);
+
+          // forbid editing reserved slots
+          if (!request || request.status === Status.REJECTED) {
+            setSelectedSlot(slot);
+            setIsEditOpen(true);
+          }
         },
       },
       calendars: {
@@ -209,6 +218,7 @@ const ReservationRequests: React.FC = () => {
           </Card>
         </Dialog>
       )}
+      <RequestTable />
     </div>
   );
 };

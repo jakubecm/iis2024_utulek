@@ -31,3 +31,11 @@ export interface ExaminationRequest {
     description: string;
     status: number;
   }
+
+  export enum Status {
+    PENDING = 0,
+    APPROVED = 1,
+    REJECTED = 2,
+    SCHEDULED = 3,
+    COMPLETED = 4,
+  }
