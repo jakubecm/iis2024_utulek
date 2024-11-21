@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
 from models.User import User
 from models.Cat import Cats
-from models.Enums import AvailableSlotStatus, Roles, Status
+from models.Enums import AvailableSlotStatus, Roles, Status, WalkRequestStatus
 from models.ReservationRequest import ReservationRequest
 from models.AvailableSlot import AvailableSlot
 from models.database import db
@@ -111,7 +111,7 @@ class ReservationList(Resource):
             SlotId=args['SlotId'],
             VolunteerId=args['VolunteerId'],
             RequestDate=args['RequestDate'],
-            Status=Status.PENDING.value
+            Status=WalkRequestStatus.PENDING.value
         )
         db.session.add(new_reservation_request)
 
