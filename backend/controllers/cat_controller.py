@@ -69,6 +69,12 @@ class CatList(Resource):
                 'examples': {
                     'application/json': {'msg': 'Invalid data provided'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Admin or Caretaker access required'}
+                }
             }
         },
         'parameters': [
@@ -95,8 +101,8 @@ class CatList(Resource):
     def post(self): # Create a new cat
         current_user = get_jwt_identity()
         print(current_user)
-        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
-            return {"msg": "Admin or Caretaker access required"}, 403
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+            return {"msg": "Admin or Caretaker access required"}, 401
         
         args = cat_parser.parse_args()
         new_cat = Cats(
@@ -183,6 +189,12 @@ class CatById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Cat not found'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Admin or Caretaker access required'}
+                }
             }
         },
         'parameters': [
@@ -215,8 +227,8 @@ class CatById(Resource):
     def put(self, cat_id): # Update a cat by ID
         current_user = get_jwt_identity()
         print(current_user)
-        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
-            return {"msg": "Admin or Caretaker access required"}, 403
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+            return {"msg": "Admin or Caretaker access required"}, 401
         
         cat = Cats.query.get(cat_id)
         if not cat:
@@ -247,6 +259,12 @@ class CatById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Cat not found'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Admin or Caretaker access required'}
+                }
             }
         },
         'parameters': [
@@ -262,8 +280,8 @@ class CatById(Resource):
     @jwt_required()
     def delete(self, cat_id):
         current_user = get_jwt_identity()
-        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
-            return {"msg": "Admin or Caretaker access required"}, 403
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+            return {"msg": "Admin or Caretaker access required"}, 401
         
         cat = Cats.query.get(cat_id)
         if not cat:

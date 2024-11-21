@@ -1,5 +1,6 @@
 from flasgger import swag_from
 from flask import jsonify
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
 from models.Enums import AvailableSlotStatus, Roles
 from models.ReservationRequest import ReservationRequest
@@ -11,7 +12,8 @@ parser.add_argument('SlotId', type=int, required=True)
 parser.add_argument('VolunteerId', type=int, required=True)
 parser.add_argument('RequestDate', type=str, required=True)
 
-# Get all reservation requests, get a specific reservation request, create a new reservation request, delete a reservation request
+allowed_roles = [Roles.ADMIN.value, Roles.VERIFIED_VOLUNTEER.value]
+
 class ReservationList(Resource):
     @swag_from({
         'tags': ['Reservation Requests'],
@@ -30,10 +32,21 @@ class ReservationList(Resource):
                         }
                     ]
                 }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized access'}
+                }
             }
         }
     })
+    @jwt_required()
     def get(self):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized access"}, 401
+        
         reservation_requests = ReservationRequest.query.all()
         reservation_request_list = [
             {
@@ -62,6 +75,12 @@ class ReservationList(Resource):
                 'examples': {
                     'application/json': {'msg': 'Invalid data provided'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized access'}
+                }
             }
         },
         'parameters': [
@@ -79,7 +98,12 @@ class ReservationList(Resource):
             }
         ]
     })
+    @jwt_required()
     def post(self):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized access"}, 401
+        
         args = parser.parse_args()
         new_reservation_request = ReservationRequest(
             SlotId=args['SlotId'],
@@ -120,8 +144,13 @@ class ReservationById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Reservation request not found'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized access'}
+                }
             }
-
         },
         'parameters': [
             {
@@ -132,7 +161,12 @@ class ReservationById(Resource):
             }
         ]
     })
+    @jwt_required()
     def get(self, reservation_request_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized access"}, 401
+        
         reservation_request = ReservationRequest.query.filter_by(Id=reservation_request_id).first()
         
         if reservation_request is None:
@@ -157,11 +191,42 @@ class ReservationById(Resource):
                         'msg': 'Reservation request deleted successfully'
                     }
                 }
+            },
+            404: {
+                'description': 'Reservation request not found',
+                'examples': {
+                    'application/json': {
+                        'msg': 'Reservation request not found'
+                    }
+                }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {
+                        'msg': 'Unauthorized access'
+                    }
+                }
             }
         }
     })
+    @jwt_required()
     def delete(self, reservation_request_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized access"}, 401
+        
         reservation_request = ReservationRequest.query.filter_by(Id=reservation_request_id).first()
+
+        if reservation_request is None:
+            return {"msg": "Reservation request not found"}, 404
+
+        # Update the slot status to available
+        slot = AvailableSlot.query.filter_by(Id=reservation_request.SlotId).first()
+        if slot is None:
+            return {"msg": "Invalid data provided"}, 400
+        slot.Status = AvailableSlotStatus.AVAILABLE.value
+        
         db.session.delete(reservation_request)
         db.session.commit()
         return {"msg": "Reservation request deleted successfully"}, 200
@@ -193,6 +258,14 @@ class ReservationById(Resource):
                         'msg': 'Reservation request not found'
                     }
                 }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {
+                        'msg': 'Unauthorized access'
+                    }
+                }
             }
         },
         'parameters': [
@@ -214,7 +287,11 @@ class ReservationById(Resource):
             }
         ]
     })
+    @jwt_required()
     def put(self, reservation_request_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+            return {"msg": "Unauthorized access"}, 401
         # parse only the Status field
         put_parser = reqparse.RequestParser()
         put_parser.add_argument('Status', type=int, required=True)

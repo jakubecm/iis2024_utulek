@@ -11,6 +11,8 @@ health_record_parser = reqparse.RequestParser()
 health_record_parser.add_argument('date', type=str, required=True, help="Date cannot be blank.")
 health_record_parser.add_argument('description', type=str, required=True, help="Description cannot be blank.")
 
+allowed_roles = [Roles.ADMIN.value, Roles.VETS.value, Roles.CAREGIVER.value]
+
 class HealthRecordList(Resource):
     @swag_from({
         'tags': ['Health Records'],
@@ -29,6 +31,12 @@ class HealthRecordList(Resource):
                         }
                     ]
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
+                }
             }
         },
         'parameters': [
@@ -40,7 +48,12 @@ class HealthRecordList(Resource):
             }
         ]
     })
+    @jwt_required()
     def get(self, cat_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized user"}, 401
+        
         # Fetch health records with joined vet info
         health_records = (
             db.session.query(HealthRecord, User)
@@ -75,6 +88,12 @@ class HealthRecordList(Resource):
                 'description': 'Bad request',
                 'examples': {
                     'application/json': {'msg': 'Invalid data provided'}
+                }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
                 }
             }
         },
@@ -111,8 +130,8 @@ class HealthRecordList(Resource):
     @jwt_required()
     def post(self, cat_id): # Create a new health record
         current_user = get_jwt_identity()
-        print(current_user)
-        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.VETS.value:
+
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.VETS.value]:
             return {"msg": "Unauthorized user"}, 401
         
         args = health_record_parser.parse_args()
@@ -150,6 +169,12 @@ class HealthRecordById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Health record not found'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
+                }
             }
         },
         'parameters': [
@@ -161,7 +186,12 @@ class HealthRecordById(Resource):
             }
         ]
     })
+    @jwt_required()
     def get(self, health_record_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized user"}, 401
+        
         health_record = HealthRecord.query.filter_by(Id=health_record_id).first()
 
         if health_record:
@@ -191,7 +221,13 @@ class HealthRecordById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Invalid data provided'}
                 }
-            }
+            },
+            401: {
+                'description': 'Unauthorized user',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized user'}
+                }
+            },
         },
         'parameters': [
             {
@@ -230,7 +266,7 @@ class HealthRecordById(Resource):
     @jwt_required()
     def put(self, health_record_id):
         current_user = get_jwt_identity()
-        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.VETS.value:
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.VETS.value]:
             return {"msg": "Unauthorized user"}, 401
         
         args = health_record_parser.parse_args()

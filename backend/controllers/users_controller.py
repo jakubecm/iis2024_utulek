@@ -23,7 +23,7 @@ class UserById(Resource):
                     'application/json': {'msg': 'User not found'}
                 }
             },
-            403: {
+            401: {
                 'description': 'Admin access required',
                 'examples': {
                     'application/json': {'msg': 'Admin access required'}
@@ -44,7 +44,7 @@ class UserById(Resource):
     def delete(self, user_id):
         current_user = get_jwt_identity()
         if current_user['role'] != Roles.ADMIN.value:
-            return {"msg": "Admin access required"}, 403
+            return {"msg": "Admin access required"}, 401
 
         user = User.query.get(user_id)
         if not user:
@@ -177,7 +177,7 @@ class UserList(Resource):
                     ]
                 }
             },
-            403: {
+            401: {
                 'description': 'Admin access required',
                 'examples': {
                     'application/json': {'msg': 'Admin access required'}
@@ -189,7 +189,7 @@ class UserList(Resource):
     def get(self):
         current_user = get_jwt_identity()
         if current_user['role'] != Roles.ADMIN.value:
-            return {"msg": "Admin access required"}, 403
+            return {"msg": "Admin access required"}, 401
 
         # Retrieve all users
         users = User.query.all()
@@ -235,7 +235,7 @@ class UserList(Resource):
                     'application/json': {'msg': 'Username already exists'}
                 }
             },
-            403: {
+            401: {
                 'description': 'Admin access required',
                 'examples': {
                     'application/json': {'msg': 'Admin access required'}
@@ -268,7 +268,7 @@ class UserList(Resource):
     def post(self):
         current_user = get_jwt_identity()
         if current_user['role'] != Roles.ADMIN.value:
-            return {"msg": "Admin access required"}, 403
+            return {"msg": "Admin access required"}, 401
 
         parser = reqparse.RequestParser()
         parser.add_argument('username', required=True, help="Username cannot be blank.")

@@ -31,6 +31,12 @@ class ExaminationRequestList(Resource):
                         }
                     ]
                 }
+            },
+            401: {
+                'description': 'Unauthorized',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized'}
+                }
             }
         }
     })
@@ -40,6 +46,8 @@ class ExaminationRequestList(Resource):
         role = current_user.get('role')
         user_id = current_user.get('user_id')
 
+        if role not in [Roles.ADMIN.value, Roles.CAREGIVER.value, Roles.VETS.value]:
+            return {'msg': 'Unauthorized'}, 401
         # Filter requests based on role
         if role == Roles.CAREGIVER.value:
             # Fetch only requests made by the caregiver
@@ -79,6 +87,12 @@ class ExaminationRequestList(Resource):
                 'examples': {
                     'application/json': {'msg': 'Bad request'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized'}
+                }
             }
         },
         'parameters': [
@@ -101,7 +115,7 @@ class ExaminationRequestList(Resource):
     @jwt_required()
     def post(self):
         current_user = get_jwt_identity()
-        if current_user['role'] != Roles.CAREGIVER.value and current_user['role'] != Roles.ADMIN.value:
+        if current_user['role'] not in [Roles.CAREGIVER.value, Roles.ADMIN.value]:
             return {'msg': 'Unauthorized'}, 401
         
         args = examination_request_parser.parse_args()
@@ -188,6 +202,12 @@ class ExaminationRequestById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Examination request not found'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized'}
+                }
             }
         },
         'parameters': [
@@ -232,7 +252,7 @@ class ExaminationRequestById(Resource):
             if role == Roles.ADMIN.value:
                 examination_request.Status = data.get('status', examination_request.Status)
         else:
-            return {'msg': 'Unauthorized'}, 403
+            return {'msg': 'Unauthorized'}, 401
 
         db.session.commit()
         return {'msg': 'Examination request updated successfully'}, 200
@@ -268,7 +288,7 @@ class ExaminationRequestById(Resource):
     @jwt_required()
     def delete(self, examination_request_id):
         current_user = get_jwt_identity()
-        if current_user['role'] != Roles.ADMIN.value and current_user['role'] != Roles.CAREGIVER.value:
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
             return {'msg': 'Unauthorized'}, 401
         
         examination_request = ExaminationRequest.query.filter_by(Id=examination_request_id).first()

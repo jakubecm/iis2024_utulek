@@ -1,11 +1,15 @@
 from flasgger import swag_from
 from flask import jsonify, make_response
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from flask_restful import Resource, reqparse
+from models.Enums import Roles
 from models.Cat import Species
 from models.database import db
 
 species_parser = reqparse.RequestParser()
 species_parser.add_argument('name', required=True, help="Name cannot be blank.")
+
+allowed_roles = [Roles.ADMIN.value, Roles.CAREGIVER.value]
 
 class SpeciesList(Resource):
     @swag_from({
@@ -130,6 +134,12 @@ class SpeciesById(Resource):
                 'examples': {
                     'application/json': {'msg': 'Species not found'}
                 }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized access'}
+                }
             }
         },
         'parameters': [
@@ -142,7 +152,12 @@ class SpeciesById(Resource):
             }
         ]
     })
+    @jwt_required()
     def delete(self, species_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized access"}, 401
+        
         species = Species.query.get(species_id)
         if not species:
             return {"msg": "Species not found"}, 404
@@ -165,6 +180,12 @@ class SpeciesById(Resource):
                 'description': 'Species not found',
                 'examples': {
                     'application/json': {'msg': 'Species not found'}
+                }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized access'}
                 }
             }
         },
@@ -191,7 +212,12 @@ class SpeciesById(Resource):
             }
         ]
     })
-    def put(self, species_id): # Update species by ID
+    @jwt_required()
+    def put(self, species_id):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized access"}, 401
+        
         species = Species.query.get(species_id)
         if not species:
             return {"msg": "Species not found"}, 404

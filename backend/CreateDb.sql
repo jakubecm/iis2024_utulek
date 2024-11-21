@@ -119,4 +119,4 @@ ALTER TABLE utulek.ReservationRequests
     ADD CONSTRAINT FK_ReservationRequestsSlots FOREIGN KEY ("SlotId") REFERENCES utulek.AvailableSlots("Id");
 
 ALTER TABLE utulek.ReservationRequests
-    ADD CONSTRAINT FK_ReservationRequestsVolunteers FOREIGN KEY ("VolunteerId") REFERENCES utulek.Volunteers("UserId");
+    ADD CONSTRAINT FK_ReservationRequestsVolunteers FOREIGN KEY ("VolunteerId") REFERENCES utulek.Users("Id");
