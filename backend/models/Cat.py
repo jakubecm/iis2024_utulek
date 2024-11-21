@@ -16,6 +16,9 @@ class Cats(db.Model):
     Description = db.Column(db.String(100), nullable=False)
     Found = db.Column(db.Date, nullable=False)
 
+    CatPhotos = db.relationship('CatPhotos', cascade='all, delete', backref='cat')
+    AvailableSlot = db.relationship('AvailableSlot', cascade='all, delete', backref='cat')	
+
 class CatPhotos(db.Model):
     __tablename__ = 'catphotos'
     __table_args__ = {'schema': 'utulek'}

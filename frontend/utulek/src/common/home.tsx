@@ -106,7 +106,7 @@ const CatList: React.FC = () => {
                 <img
                   src={imageUrl}
                   alt={cat.name}
-                  className="h-64 w-full object-cover rounded-t-lg"
+                  className="h-64 w-full object-center rounded-t-lg"
                   onError={(e) => {
                     e.currentTarget.src = "/static/default-image.png";
                   }}
@@ -140,17 +140,17 @@ const CatList: React.FC = () => {
                     color="blue-gray"
                     size="sm"
                     onClick={() => navigateToHealthRecords(cat.id)}
-                    className="flex items-center gap-2"
+                    className="mr-3"
                   >
                     <ListIcon fontSize="small" /> Health Records
                   </Button>
                 )}
                 {(role === Role.CAREGIVER || role === Role.ADMIN) && (
                   <>
-                    <DeleteCatButton catId={cat.id} onCatDeleted={handleCatDeleted} />
-                    <Button color="blue-gray" onClick={() => setSelectedCat(cat)}>
+                    <Button color="blue-gray" className="mr-3" onClick={() => setSelectedCat(cat)}>
                       Edit
                     </Button>
+                    <DeleteCatButton catId={cat.id} onCatDeleted={handleCatDeleted} />
                   </>
                 )}
               </CardFooter>

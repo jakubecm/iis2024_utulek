@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Card, CardBody, CardFooter, Dialog, select, Option } from '@material-tailwind/react';
+import { Dialog, Option } from '@material-tailwind/react';
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react';
 import {
   CalendarEvent,

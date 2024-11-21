@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from "@material-tailwind/react";
 import { API_URL } from "../App";
 
 interface DeleteCatButtonProps {
@@ -30,7 +31,7 @@ const DeleteCatButton: React.FC<DeleteCatButtonProps> = ({ catId, onCatDeleted }
     }
   };
 
-  return <button onClick={handleDelete}>Delete</button>;
+  return <Button color='red' onClick={handleDelete}>Delete</Button>;
 };
 
 export default DeleteCatButton;
