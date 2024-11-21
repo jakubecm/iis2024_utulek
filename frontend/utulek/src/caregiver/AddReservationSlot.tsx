@@ -65,6 +65,7 @@ const AddReservationSlot: React.FC<AddReservationSlotProps> = ({ onReservationAd
             // POST request to the endpoint
             const response = await fetch(`${API_URL}/availableslots`, {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(requestBody),
             });

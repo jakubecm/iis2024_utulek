@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   role: number | null;
+  userId: number | null,
   isAuthenticated: boolean;
   refreshAuth: () => void;  // Add a function to refresh the authentication state
 }
 
 const AuthContext = createContext<AuthContextType>({
   role: null,
+  userId: null,
   isAuthenticated: false,
   refreshAuth: () => {},  // Placeholder function
 });
@@ -17,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<number | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true); // New loading state
   const navigate = useNavigate();
 
@@ -35,6 +38,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         setRole(data.role);  // Set the user role
+
+        if (data.user_id) {
+          setUserId(data.user_id);  // Set the user ID
+        }
       } else {
         setRole(null);  // If not authenticated, set role to null
       }
@@ -67,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAuthenticated = role != null && role != -1;  // Check if the user is authenticated
 
-  const contextValue = React.useMemo(() => ({ role, isAuthenticated, refreshAuth }), [role, isAuthenticated]);
+  const contextValue = React.useMemo(() => ({ role, isAuthenticated, refreshAuth, userId }), [role, isAuthenticated]);
 
   if (loading) return null; // Wait until loading is done before rendering children
   // console.log("isAuthenticated:", isAuthenticated);

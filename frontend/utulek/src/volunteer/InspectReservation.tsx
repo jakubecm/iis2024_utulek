@@ -4,6 +4,7 @@ import { Cat } from '../types';
 import { Button, Card, CardBody, CardFooter, Typography } from '@material-tailwind/react';
 import { format, parseISO } from 'date-fns';
 import { API_URL } from '../App';
+import { useAuth } from '../auth/AuthContext';
 
 interface InspectReservationProps {
   onReservationEdited: () => void;
@@ -13,10 +14,37 @@ interface InspectReservationProps {
 
 const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEdited, slot, cat }) => {
   const [catPhoto, setCatPhoto] = useState<string>("");
+  const { userId } = useAuth();
 
-  const handleReserve = () => {
-    console.log("Reserve button clicked! Future functionality here.");
-    // Placeholder for reserve functionality
+  const handleReserve = async () => {
+    try {
+      const requestBody = {
+        SlotId: slot.id,
+        VolunteerId: userId, // Replace with actual volunteer ID if needed
+        RequestDate: format(new Date(), "yyyy-MM-dd"), // Current date and time
+      };
+
+      console.log("Sending reservation request:", requestBody);
+
+      const response = await fetch(`${API_URL}/reservationrequests`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error Response:", errorData);
+        throw new Error(errorData?.msg || "Failed to create reservation request");
+      }
+
+      console.log("Reservation request created successfully");
+      onReservationEdited(); // Notify parent of the new reservation
+    } catch (err) {
+      console.error("Error creating reservation request:", err);
+      alert(err instanceof Error ? err.message : "An unexpected error occurred");
+    }
   };
 
   // fetch cat photo
@@ -48,16 +76,16 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
   }, []);
 
   return (
-    <Card className="mx-auto w-full !max-w-[35rem] !min-w-[32rem] px-2">
+    <Card className="mx-auto w-full !max-w-[40rem] !min-w-[40rem] px-2">
       <CardBody className="flex flex-col gap-4">
         <Typography variant="h5" color="blue-gray" className="mb-4 text-center font-semibold">
           Reservation Details
         </Typography>
 
         {/* Cat Information */}
-        <div className='flex row space-x-5'>
+        <div className='flex row justify-between'>
           <div>
-            <div className="mb-4">
+            <div className="mb-4 max-w-[20rem]">
               <Typography variant="h6" color="blue-gray" className="font-bold">
                 Cat Information
               </Typography>

@@ -179,6 +179,6 @@ class GetUserRole(Resource):
         if current_user:
             # Get the expiration time (exp) from the JWT
             expires_at = get_jwt()["exp"]  # exp is the expiration time in seconds since epoch
-            return jsonify({"role": current_user['role'], "expires_at": expires_at})
+            return jsonify({"role": current_user['role'], "user_id": current_user['user_id'], "expires_at": expires_at})
         else:
             return jsonify({"role": Roles.UNAUTHORIZED.value})

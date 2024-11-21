@@ -38,7 +38,13 @@ const WalkReservations: React.FC = () => {
   const fetchSlots = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/availableslots`);
+      const response = await fetch(`${API_URL}/availableslots`, {
+        method: "GET",
+        credentials: "include", // Include cookies for authentication
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch slots");
       const data = await response.json();
       console.log('data:', data);

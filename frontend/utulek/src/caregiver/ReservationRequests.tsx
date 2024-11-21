@@ -23,15 +23,45 @@ export interface Slot {
   end_time: string;   // ISO 8601 date string
 }
 
+export interface ReservationRequest {
+  id: number;
+  slot_id: number;
+  volunteer_id: string;
+  request_date: string;
+  status: number;
+}
+
 const ReservationRequests: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [slots, setSlots] = useState<Slot[]>([]);
+  const [requests, setRequests] = useState<ReservationRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Slot>();
   const [catList, setCatList] = useState<Cat[]>([]);
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/reservationrequests`, {
+        method: "GET",
+        credentials: "include", // Include cookies for authentication
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch requests");
+      const data = await response.json();
+      console.log('data:', data);
+      setRequests(data);
+    } catch (err) {
+      setError("Failed to fetch requests");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Ref to always hold the latest value of slots
   const slotsRef = useRef<Slot[]>([]);
@@ -39,7 +69,13 @@ const ReservationRequests: React.FC = () => {
   const fetchSlots = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/availableslots`);
+      const response = await fetch(`${API_URL}/availableslots?all=true`, {
+        method: "GET",
+        credentials: "include", // Include cookies for authentication
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch slots");
       const data = await response.json();
       console.log('data:', data);
@@ -64,18 +100,23 @@ const ReservationRequests: React.FC = () => {
   useEffect(() => {
     fetchSlots();
     fetchCats();
+    fetchRequests();
   }, []);
 
   // Update events whenever slots are fetched
   useEffect(() => {
     if (!loading && slots.length > 0) {
-      const cat = catList.find((cat) => cat.id === slots[0].cat_id);
-      const mappedEvents = slots.map((slot) => ({
+      const mappedEvents = slots.map((slot) => {
+        const cat = catList.find((cat) => cat.id === slot.cat_id);
+        const request = requests.find((req) => req.slot_id === slot.id);
+
+        return {
         id: slot.id.toString(),
         title: cat?.name || "",
         start: slot.start_time,
         end: slot.end_time,
-      }));
+        calendarId: request ? 'reserved' : '',
+    }});
       setEvents(mappedEvents);
     }
   }, [slots, loading]);
@@ -99,6 +140,16 @@ const ReservationRequests: React.FC = () => {
           const slot = slotsRef.current.find((s) => s.id === Number(calendarEvent.id));
           setSelectedSlot(slot);
           setIsEditOpen(true);
+        },
+      },
+      calendars: {
+        reserved: {
+          colorName: 'reserved',
+          lightColors: {
+            main: '#ff4747',
+            container: '#ff5757',
+            onContainer: '#590009',
+          },
         },
       },
     },
