@@ -42,7 +42,7 @@ const UsersDashboard: React.FC = () => {
   }, []);
 
   const adminUsers = users.filter((user) => user.role === 0);
-  const volunteerUsers = users.filter((user) => user.role === 1);
+  const volunteerUsers = users.filter((user) => user.role === 1 || user.role === 4);
   const veterinarianUsers = users.filter((user) => user.role === 2);
   const caregiverUsers = users.filter((user) => user.role === 3);
   
