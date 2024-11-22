@@ -15,6 +15,7 @@ import ReservationRequests from './caregiver/ReservationRequests';
 import ExaminationRequests from './caregiver/ExaminationRequests';
 import VolunteerDashboard from './caregiver/VolunteerDashboard';
 import WalkReservations from './volunteer/WalkReservations';
+import WalkHistory from './caregiver/WalkHistory';
 
 export const API_URL = "http://127.0.0.1:5000";
 
@@ -53,6 +54,9 @@ function App() {
                 </Route>
                 <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.VOLUNTEER]} />}>
                   <Route path="/volunteer/reservations" element={<WalkReservations />} />
+                </Route>
+                <Route element={<ProtectedRoute requiredRoles={[Role.CAREGIVER]} />}>
+                  <Route path="/caregiver/walks" element={<WalkHistory />} />
                 </Route>
               </Routes>
             </div>

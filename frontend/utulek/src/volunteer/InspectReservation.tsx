@@ -16,6 +16,7 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
   const [catPhoto, setCatPhoto] = useState<string>("");
   const { userId } = useAuth();
   const [isDefaultImageAvailable, setIsDefaultImageAvailable] = useState(true);
+  const [isExpired, setIsExpired] = useState(false);
 
   const handleReserve = async () => {
     try {
@@ -73,8 +74,8 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
         data.length > 0
           ? `${API_URL}/${data[0].photo_url.replace("./", "")}`
           : isDefaultImageAvailable
-          ? `${API_URL}/catphotos/default-image.png`
-          : "";
+            ? `${API_URL}/catphotos/default-image.png`
+            : "";
       console.log('image url:', imageUrl);
       setCatPhoto(imageUrl);
       console.log('cat photo:', data);
@@ -85,6 +86,7 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
 
   useEffect(() => {
     defaultImageAvailable();
+    setIsExpired(new Date() > new Date(slot.end_time));
   }, []);
 
   useEffect(() => {
@@ -155,9 +157,13 @@ const InspectReservation: React.FC<InspectReservationProps> = ({ onReservationEd
 
       {/* Reserve Button */}
       <CardFooter className="flex justify-center">
-        <Button color="green" onClick={handleReserve}>
-          Make reservation
-        </Button>
+        {!isExpired ? (
+          <Button color="green" onClick={handleReserve}>
+            Make reservation
+          </Button>
+        ) : (<Typography color="red" className="text-center py-10">
+          This slot has expired
+        </Typography>)}
       </CardFooter>
     </Card>
   );

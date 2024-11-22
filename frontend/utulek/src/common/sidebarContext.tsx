@@ -132,6 +132,11 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       icon: <InboxIcon className="h-5 w-5" />,
       route: '/caregiver/volunteer_validation',
     },
+    {
+      label: 'Walk Management',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/caregiver/walks',
+    }
   ];
 
   const vetsSidebarData: SidebarItem[] = [

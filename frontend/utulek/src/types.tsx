@@ -37,4 +37,5 @@ export interface ExaminationRequest {
     APPROVED = 1,
     REJECTED = 2,
     COMPLETED = 3,
+    IN_PROGRESS = 4,
   }
