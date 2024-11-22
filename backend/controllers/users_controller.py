@@ -90,7 +90,7 @@ class UserById(Resource):
     @jwt_required()
     def put(self, user_id):
         current_user = get_jwt_identity()
-        if current_user['role'] != Roles.ADMIN.value:
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
             return {"msg": "Admin access required"}, 403
 
         user = User.query.get(user_id)
@@ -108,18 +108,6 @@ class UserById(Resource):
         parser.add_argument('Telephone', type=str, required=False)
         parser.add_argument('verified', type=bool, required=False)
         args = parser.parse_args()
-
-        # Update user fields if provided
-        if args['Username']:
-            user.Username = args['Username']
-        if args['FirstName']:
-            user.FirstName = args['FirstName']
-        if args['LastName']:
-            user.LastName = args['LastName']
-        if args['Email']:
-            user.Email = args['Email']
-        if args['role'] is not None:
-            user.role = args['role']
 
         # Update veterinarian-specific fields if the user is a vet
         if user.role == Roles.VETS.value:
@@ -142,6 +130,18 @@ class UserById(Resource):
                 volunteer = Volunteer(UserId=user.Id)
                 db.session.add(volunteer)
             volunteer.verified = args['verified']
+
+        # Update user fields if provided
+        if args['Username']:
+            user.Username = args['Username']
+        if args['FirstName']:
+            user.FirstName = args['FirstName']
+        if args['LastName']:
+            user.LastName = args['LastName']
+        if args['Email']:
+            user.Email = args['Email']
+        if args['role'] is not None:
+            user.role = args['role']
 
         # Commit changes to the database
         db.session.commit()
