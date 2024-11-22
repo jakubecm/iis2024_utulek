@@ -10,7 +10,6 @@ import UsersDashboard from './admin/UsersDashboard';
 import SpeciesDashboard from './caregiver/SpeciesDashboard';
 import HealthRecords from './vets/HealthRecords';
 import { Role } from './auth/jwt';
-import Reservations from './common/Reservations';
 import ReservationRequests from './caregiver/ReservationRequests';
 import ExaminationRequests from './caregiver/ExaminationRequests';
 import VolunteerDashboard from './caregiver/VolunteerDashboard';
