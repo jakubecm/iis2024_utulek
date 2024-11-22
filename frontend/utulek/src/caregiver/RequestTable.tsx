@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Typography } from '@material-tailwind/react';
-import { ReservationRequest } from './ReservationRequests';
+import { Button, Card, Typography, Dialog, DialogBody, DialogFooter } from '@material-tailwind/react';
 import { API_URL } from '../App';
 import { Status } from '../types';
 
@@ -8,6 +7,7 @@ interface Request {
     reservation_id: number;
     volunteer_username: number;
     volunteer_full_name: string;
+    volunteer_email: string;
     cat_name: string;
     start_time: string;
     end_time: string;
@@ -20,6 +20,8 @@ interface RequestTableProps {
 
 const RequestTable: React.FC<RequestTableProps> = () => {
     const [requestList, setRequestList] = useState<Request[]>([]);
+    const [selectedUser, setSelectedUser] = useState<Request | null>(null);
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
     const fetchRequests = async () => {
         try {
@@ -72,6 +74,11 @@ const RequestTable: React.FC<RequestTableProps> = () => {
           }
     };
 
+    const openUserModal = (user: Request) => {
+        setSelectedUser(user);
+        setIsUserModalOpen(true);
+    };
+
     useEffect(() => {
         fetchRequests();
     }, []);
@@ -81,11 +88,6 @@ const RequestTable: React.FC<RequestTableProps> = () => {
             <table className="w-full min-w-max table-auto text-left">
                 <thead>
                     <tr>
-                        <th style={{ width: '150px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
-                                Username
-                            </Typography>
-                        </th>
                         <th style={{ width: '200px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
                             <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
                                 Full Name
@@ -113,13 +115,13 @@ const RequestTable: React.FC<RequestTableProps> = () => {
                 <tbody>
                     {requestList.map((r) => (
                         <tr key={r.reservation_id}>
-                            <td style={{ width: '150px' }} className="p-4 border-b border-blue-gray-50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
-                                    {r.volunteer_username}
-                                </Typography>
-                            </td>
                             <td style={{ width: '200px' }} className="p-4 border-b border-blue-gray-50 bg-blue-gray-50/50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
+                                <Typography
+                                    variant="small"
+                                    color="blue"
+                                    className="font-normal cursor-pointer underline"
+                                    onClick={() => openUserModal(r)}
+                                >
                                     {r.volunteer_full_name}
                                 </Typography>
                             </td>
@@ -150,6 +152,31 @@ const RequestTable: React.FC<RequestTableProps> = () => {
                     ))}
                 </tbody>
             </table>
+
+            {/* User Info Modal */}
+            {selectedUser && (
+                <Dialog open={isUserModalOpen} handler={() => setIsUserModalOpen(false)}>
+                    <DialogBody>
+                        <Typography variant="h2" color="blue-gray">
+                            User Information
+                        </Typography>
+                        <Typography variant="h5" color="blue-gray">
+                            <strong>Username:</strong> {selectedUser.volunteer_username}
+                        </Typography>
+                        <Typography variant="h5" color="blue-gray">
+                            <strong>Full Name:</strong> {selectedUser.volunteer_full_name}
+                        </Typography>
+                        <Typography variant="h5" color="blue-gray">
+                            <strong>Email:</strong> {selectedUser.volunteer_email}
+                        </Typography>
+                    </DialogBody>
+                    <DialogFooter>
+                        <Button variant="text" color="red" onClick={() => setIsUserModalOpen(false)} className="mr-2">
+                            Close
+                        </Button>
+                    </DialogFooter>
+                </Dialog>
+            )}
         </Card>
     );
 };
