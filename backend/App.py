@@ -13,7 +13,7 @@ from controllers.species_controller import SpeciesList, SpeciesById
 from controllers.examination_controller import ExaminationRequestList, ExaminationRequestById
 from controllers.healthrec_controller import HealthRecordList,  HealthRecordById
 from controllers.availableslot_controller import AvailableSlotList, AvailableSlotById
-from controllers.reservationrequest_controller import ReservationList, ReservationById, ReservationOverview
+from controllers.reservationrequest_controller import ReservationList, ReservationById, ReservationOverview, ReservationOverviewSorted
 from controllers.users_controller import UserById, UserList, UnverifiedVolunteers
 
 # DB import
@@ -75,6 +75,7 @@ api.add_resource(AvailableSlotById, '/availableslots/<int:slot_id>')
 api.add_resource(ReservationList, '/reservationrequests')
 api.add_resource(ReservationById, '/reservationrequests/<int:reservation_request_id>')
 api.add_resource(ReservationOverview, '/reservationrequests/overview')
+api.add_resource(ReservationOverviewSorted, '/reservationrequests/overview/sorted')
 
 api.add_resource(UserList, '/admin/users') 
 api.add_resource(UserById, '/admin/users/<int:user_id>')

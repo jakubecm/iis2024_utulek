@@ -372,3 +372,77 @@ class ReservationOverview(Resource):
         ]
 
         return jsonify(reservations_list)
+
+class ReservationOverviewSorted(Resource):
+    @swag_from({
+        'tags': ['Reservations'],
+        'summary': 'Get a sorted list of all reservations by start time',
+        'responses': {
+            200: {
+                'description': 'Successfully retrieved and sorted reservations',
+                'examples': {
+                    'application/json': [
+                        {
+                            "reservation_id": 1,
+                            "volunteer_username": "john_doe",
+                            "volunteer_full_name": "John Doe",
+                            "cat_name": "Whiskers",
+                            "start_time": "2024-11-25 10:00",
+                            "end_time": "2024-11-25 11:00",
+                            "reservation_status": "Pending"
+                        }
+                    ]
+                }
+            },
+            401: {
+                'description': 'Unauthorized access',
+                'examples': {
+                    'application/json': {'msg': 'Unauthorized access'}
+                }
+            }
+        }
+    })
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        if current_user['role'] not in allowed_roles:
+            return {"msg": "Unauthorized access"}, 401
+
+        # Query the database and sort by AvailableSlot.StartTime
+        reservations = db.session.query(
+            ReservationRequest.Id.label('reservation_id'),
+            User.Username.label('volunteer_username'),
+            db.func.concat(User.FirstName, ' ', User.LastName).label('volunteer_full_name'),
+            Cats.Name.label('cat_name'),
+            AvailableSlot.StartTime.label('start_time'),
+            AvailableSlot.EndTime.label('end_time'),
+            AvailableSlot.Id.label('slot_id'),
+            ReservationRequest.Status.label('reservation_status')
+        ).join(
+            User, User.Id == ReservationRequest.VolunteerId
+        ).join(
+            AvailableSlot, AvailableSlot.Id == ReservationRequest.SlotId
+        ).join(
+            Cats, Cats.Id == AvailableSlot.CatId
+         ).filter(
+            ReservationRequest.Status.in_([WalkRequestStatus.APPROVED.value, WalkRequestStatus.IN_PROGRESS.value, WalkRequestStatus.COMPLETED.value])  # Filter by status 2 or 3
+        ).order_by(
+            AvailableSlot.StartTime  # Sort by start time
+        ).all()
+
+        # Format the response
+        reservations_list = [
+            {
+                "reservation_id": r.reservation_id,
+                "volunteer_username": r.volunteer_username,
+                "volunteer_full_name": r.volunteer_full_name,
+                "cat_name": r.cat_name,
+                "start_time": r.start_time.strftime('%Y-%m-%d %H:%M'),
+                "end_time": r.end_time.strftime('%Y-%m-%d %H:%M'),
+                "reservation_status": r.reservation_status,
+                "slot_id": r.slot_id
+            }
+            for r in reservations
+        ]
+
+        return jsonify(reservations_list)
