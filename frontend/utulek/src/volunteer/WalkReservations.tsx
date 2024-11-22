@@ -12,9 +12,11 @@ import { createEventsServicePlugin } from '@schedule-x/events-service';
 
 import '@schedule-x/theme-default/dist/index.css';
 import { API_URL } from '../App';
-import { Cat } from '../types';
+import { Cat, Status } from '../types';
 import InspectReservation from './InspectReservation';
 import AsyncSelect from '../components/AsyncSelect';
+import { useAuth } from '../auth/AuthContext';
+import { Request } from '../caregiver/WalkHistoryTable';
 
 export interface Slot {
   id: number;
@@ -33,9 +35,34 @@ const WalkReservations: React.FC = () => {
   const [selectedCat, setSelectedCat] = useState<Cat | null>(null);
   const [selectedCalendarCat, setSelectedCalendarCat] = useState<Cat>();
   const [catList, setCatList] = useState<Cat[]>([]);
+  const [requests, setRequests] = useState<Request[]>([]);
+  const { userId } = useAuth();
 
   // Ref to always hold the latest value of slots
   const slotsRef = useRef<Slot[]>([]);
+  const requestsRef = useRef<Request[]>([]);
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/reservationrequests/overview?user_id=${userId}`, {
+        method: "GET",
+        credentials: "include", // Include cookies for authentication
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch requests");
+      const data = await response.json();
+      console.log('data:', data);
+      setRequests(data);
+      requestsRef.current = data; // Update the ref with the fetched requests
+    } catch (err) {
+      setError("Failed to fetch requests");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchSlots = async () => {
     setLoading(true);
@@ -71,6 +98,7 @@ const WalkReservations: React.FC = () => {
 
   useEffect(() => {
     fetchSlots();
+    fetchRequests();
     fetchCats();
   }, []);
 
@@ -81,7 +109,7 @@ const WalkReservations: React.FC = () => {
         ? slots.filter((slot) => slot.cat_id === selectedCat.id)
         : slots;
 
-      const mappedEvents = filteredSlots.map((slot) => {
+      const openEvents = filteredSlots.map((slot) => {
         const cat = catList.find((cat) => cat.id === slot.cat_id);
         return ({
           id: slot.id.toString(),
@@ -90,8 +118,32 @@ const WalkReservations: React.FC = () => {
           end: slot.end_time,
           cat: cat,
           slot: slot,
+          calendarId: '',
         });
       });
+
+      // show events that are already registered
+      // criteria: slot is not available and it is in progress or approved
+      const registeredEvents = requests.map((req) => {
+        const slot = slots.find((s) => s.id === req.slot_id);
+        const cat = catList.find((c) => c.id === req.cat_id && (c.id === selectedCat?.id || !selectedCat));
+        if (slot || !cat || (Number(req.reservation_status) != Status.PENDING && Number(req.reservation_status) != Status.APPROVED)) return;
+        const color_profile = Number(req.reservation_status) == Status.PENDING ? 'pending' : Number(req.reservation_status) == Status.APPROVED ? 'approved' : '';
+        return ({
+          id: req.slot_id.toString(),
+          title: cat?.name || "",
+          start: req.start_time,
+          end: req.end_time,
+          cat: cat,
+          slot: null,
+          calendarId: color_profile,
+        });
+      }).filter((event) => event !== undefined);;
+      console.log('openEvents:', openEvents);
+        console.log('registeredEvents:', registeredEvents);
+
+      const mappedEvents = [...openEvents, ...registeredEvents];
+      console.log('mappedEvents:', mappedEvents);
       setEvents(mappedEvents);
     }
   }, [slots, loading, catList, selectedCat]);
@@ -117,6 +169,24 @@ const WalkReservations: React.FC = () => {
           setIsEditOpen(true);
         },
       },
+      calendars: {
+        pending: {
+          colorName: 'pending',
+          lightColors: {
+            main: '#ff4747',
+            container: '#ff5757',
+            onContainer: '#590009',
+          },
+        },
+        approved: {
+          colorName: 'approved',
+          lightColors: {
+            main: '#47ff47', // Vibrant green
+            container: '#57ff57', // Slightly lighter green
+            onContainer: '#005900', // Dark green for contrast
+          },
+        },
+      },
     },
     plugins
   );
@@ -130,6 +200,7 @@ const WalkReservations: React.FC = () => {
   const handleSlotEdited = () => {
     setIsEditOpen(false);
     fetchSlots();
+    fetchRequests();
   };
 
   const handleCatChange = (selectedId?: string) => {

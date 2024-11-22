@@ -1,32 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Typography } from '@material-tailwind/react';
 import { ReservationRequest } from './ReservationRequests';
 import { API_URL } from '../App';
 import { Status } from '../types';
-
-interface Request {
-    reservation_id: number;
-    volunteer_username: number;
-    volunteer_full_name: string;
-    cat_name: string;
-    start_time: string;
-    end_time: string;
-    reservation_status: string;
-    slot_id: number;
-}
-
-const StatusStr: { [key: number]: string } = {
-    1: "Pending",
-    3: "Completed",
-    4: "In Progress",
-  };
+import WalkHistoryTable, { Request } from './WalkHistoryTable';
+import { Typography } from '@material-tailwind/react';
 
 const WalkHistory: React.FC = () => {
+    const [ongoingRequestList, setOngoingRequestList] = useState<Request[]>([]);
     const [requestList, setRequestList] = useState<Request[]>([]);
 
-    const fetchRequests = async () => {
+    const fetchRequests = async (route: string) => {
         try {
-            const response = await fetch(`${API_URL}/reservationrequests/overview/sorted`, {
+            const response = await fetch(`${API_URL}/reservationrequests/overview/${route}`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: {
@@ -39,8 +24,8 @@ const WalkHistory: React.FC = () => {
             }
 
             const data = await response.json();
-            console.log('khaled:', data);
-            setRequestList(data);
+            if (route == 'sorted') setRequestList(data);
+            else setOngoingRequestList(data);
         } catch (err) {
             console.error(err);
             // setError(err.message);
@@ -50,7 +35,7 @@ const WalkHistory: React.FC = () => {
         }
     }
 
-    const approveRequest = async (r: Request, status: Status) => {
+    const updateRequestState = async (r: Request, status: Status) => {
         try {
             const response = await fetch(`${API_URL}/reservationrequests/${r.reservation_id}`, {
                 method: "PUT",
@@ -66,14 +51,13 @@ const WalkHistory: React.FC = () => {
                 throw new Error(errorData.msg || "Failed to update reservation request");
             }
 
-            handleSlotDelete(r);
-
             console.log("Reservation request updated successfully");
             // Optionally handle successful status update (e.g., refresh table or notify user)
         } catch (error) {
             console.error("Error approving reservation request:", error);
         } finally {
-            fetchRequests();
+            fetchRequests('sorted');
+            fetchRequests('ongoing');
         }
     };
 
@@ -101,7 +85,8 @@ const WalkHistory: React.FC = () => {
         } catch (error) {
             console.error("Error deleting reservation request:", error);
         } finally {
-            fetchRequests();
+            fetchRequests('sorted');
+            fetchRequests('ongoing');
         }
     };
 
@@ -115,100 +100,19 @@ const WalkHistory: React.FC = () => {
     }
 
     useEffect(() => {
-        fetchRequests();
+        fetchRequests('sorted');
+        fetchRequests('ongoing');
     }, []);
 
     return (
-        <Card className="h-full w-full my-5">
-            <table className="w-full min-w-max table-auto text-left">
-                <thead>
-                    <tr>
-                        <th style={{ width: '150px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
-                                Username
-                            </Typography>
-                        </th>
-                        <th style={{ width: '200px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
-                                Full Name
-                            </Typography>
-                        </th>
-                        <th style={{ width: '100px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
-                                Cat
-                            </Typography>
-                        </th>
-                        <th style={{ width: '150px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
-                                Start time
-                            </Typography>
-                        </th>
-                        <th style={{ width: '150px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
-                                End time
-                            </Typography>
-                        </th>
-                        <th style={{ width: '100px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                            <Typography variant="small" color="blue-gray" className="font-normal leading-none opacity-70">
-                                Status
-                            </Typography>
-                        </th>
-                        <th style={{ width: '250px' }} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {requestList.map((r) => (
-                        <tr key={r.reservation_id}>
-                            <td style={{ width: '150px' }} className="p-4 border-b border-blue-gray-50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
-                                    {r.volunteer_username}
-                                </Typography>
-                            </td>
-                            <td style={{ width: '200px' }} className="p-4 border-b border-blue-gray-50 bg-blue-gray-50/50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
-                                    {r.volunteer_full_name}
-                                </Typography>
-                            </td>
-                            <td style={{ width: '100px' }} className="p-4 border-b border-blue-gray-50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
-                                    {r.cat_name}
-                                </Typography>
-                            </td>
-                            <td style={{ width: '100px' }} className="p-4 border-b border-blue-gray-50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
-                                    {r.start_time}
-                                </Typography>
-                            </td>
-                            <td style={{ width: '100px' }} className="p-4 border-b border-blue-gray-50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
-                                    {r.end_time}
-                                </Typography>
-                            </td>
-                            <td style={{ width: '100px' }} className="p-4 border-b border-blue-gray-50">
-                                <Typography variant="small" color="blue-gray" className="font-normal">
-                                    {StatusStr[Number(r.reservation_status)]}
-                                </Typography>
-                            </td>
-                            <td style={{ width: '250px' }} className="p-4 border-b border-blue-gray-50 justify-between flex row">
-                                {Number(r.reservation_status) == Status.APPROVED ?
-                                    <Button color="green" onClick={() => approveRequest(r, Status.IN_PROGRESS)}>
-                                        Start
-                                    </Button> : Number(r.reservation_status) == Status.IN_PROGRESS ?
-                                    <Button color="green" onClick={() => approveRequest(r, Status.COMPLETED)}>
-                                        End
-                                    </Button> : <></>}
+        <>
+            <Typography color="gray" variant='h3' >Current Walks</Typography>
+            <WalkHistoryTable walks={ongoingRequestList} updateRequestState={updateRequestState} deleteRequest={deleteRequest} />
 
+            <Typography color="gray" variant='h3' className='mt-8'>Walk History</Typography>
+            <WalkHistoryTable walks={requestList} updateRequestState={updateRequestState} deleteRequest={deleteRequest} />
+        </>
 
-                                <Button color="red" onClick={() => deleteRequest(r)}>
-                                    { Number(r.reservation_status) == Status.COMPLETED ? "Remove" : "Cancel"}
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </Card>
     );
 };
 

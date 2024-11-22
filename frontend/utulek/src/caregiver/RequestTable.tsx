@@ -14,16 +14,8 @@ interface Request {
     reservation_status: string;
 }
 
-// "volunteer_username": r.volunteer_username,
-// "volunteer_full_name": r.volunteer_full_name,
-// "cat_name": r.cat_name,
-// "start_time": r.start_time.strftime('%Y-%m-%d %H:%M'),
-// "end_time": r.end_time.strftime('%Y-%m-%d %H:%M'),
-// "reservation_status": r.reservation_status
-
 interface RequestTableProps {
-    // requestList: ReservationRequest[];
-    // approveRequest: (volunteer: Volunteer) => void;
+    onApprove: () => void;
 }
 
 const RequestTable: React.FC<RequestTableProps> = () => {

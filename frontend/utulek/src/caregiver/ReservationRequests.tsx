@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Card, CardBody, CardFooter, Dialog } from '@material-tailwind/react';
+import { Button, Card, CardBody, CardFooter, Dialog, Option } from '@material-tailwind/react';
 import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react';
 import {
   CalendarEvent,
@@ -16,6 +16,7 @@ import AddReservationSlot from './AddReservationSlot';
 import EditReservationSlot from './EditReservationSlot';
 import { Cat, Status } from '../types';
 import RequestTable from './RequestTable';
+import AsyncSelect from '../components/AsyncSelect';
 
 export interface Slot {
   id: number;
@@ -42,6 +43,7 @@ const ReservationRequests: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<Slot>();
   const [catList, setCatList] = useState<Cat[]>([]);
+  const [selectedCat, setSelectedCat] = useState<Cat | null>(null);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -82,7 +84,6 @@ const ReservationRequests: React.FC = () => {
       });
       if (!response.ok) throw new Error("Failed to fetch slots");
       const data = await response.json();
-      console.log('data:', data);
       setSlots(data);
       slotsRef.current = data; // Update the ref with the fetched slots
     } catch (err) {
@@ -96,6 +97,7 @@ const ReservationRequests: React.FC = () => {
     fetch(`${API_URL}/cats`)
       .then((response) => response.json())
       .then((data) => {
+        data.unshift({ id: "", name: "All Cats" });
         setCatList(data);
       })
       .catch((error) => console.error("Error fetching cats:", error));
@@ -110,22 +112,38 @@ const ReservationRequests: React.FC = () => {
   // Update events whenever slots are fetched
   useEffect(() => {
     if (!loading && slots.length > 0) {
-      const mappedEvents = slots.map((slot) => {
-        const cat = catList.find((cat) => cat.id === slot.cat_id);
-        const request = requests.find((req) => req.slot_id === slot.id);
+      const filteredSlots = selectedCat
+        ? slots.filter((slot) => slot.cat_id === selectedCat.id)
+        : slots;
 
+      const mappedEvents = filteredSlots.map((slot) => {
+        const cat = catList.find((cat) => cat.id === slot.cat_id);
+        const request = requests.find((req) => req.slot_id === slot.id && req.status != Status.REJECTED && req.status != Status.CANCELED);
+        console.log('request:', request);
+
+        const past = new Date(slot.end_time) < new Date();
+        const color_profile = request && (request.status == Status.PENDING ? 'pending' : request.status == Status.APPROVED ? 'approved' : past ? 'old' : '');
+        console.log('color_profile:', color_profile);
         return {
-        id: slot.id.toString(),
-        title: cat?.name || "",
-        start: slot.start_time,
-        end: slot.end_time,
-        calendarId: request && request.status != Status.REJECTED ? 'reserved' : '',
-    }});
+          id: slot.id.toString(),
+          title: cat?.name || "",
+          start: slot.start_time,
+          end: slot.end_time,
+          calendarId: color_profile,
+        }
+      });
       setEvents(mappedEvents);
     }
-  }, [slots, loading]);
+  }, [slots, loading, selectedCat, requests]);
 
-  console.log('events:', events);
+  const handleCatChange = (selectedId?: string) => {
+    if (!selectedId) {
+      setSelectedCat(null); // Show all cats
+    } else {
+      const cat = catList.find((c) => c.id.toString() === selectedId);
+      setSelectedCat(cat || null);
+    }
+  };
 
   const plugins = [createEventsServicePlugin()];
 
@@ -142,22 +160,38 @@ const ReservationRequests: React.FC = () => {
           console.log('Event clicked:', calendarEvent);
           // Use slotsRef to access the latest slots
           const slot = slotsRef.current.find((s) => s.id === Number(calendarEvent.id));
-          const request = requestsRef.current.find((req) => slot && req.slot_id === slot.id);
+          const request = requestsRef.current.find((req) => slot && req.slot_id === slot.id && req.status != Status.REJECTED && req.status != Status.CANCELED);
 
           // forbid editing reserved slots
-          if (!request || request.status === Status.REJECTED) {
+          if (!request && slot && new Date(slot.end_time) > new Date()) {
             setSelectedSlot(slot);
             setIsEditOpen(true);
           }
         },
       },
       calendars: {
-        reserved: {
-          colorName: 'reserved',
+        pending: {
+          colorName: 'pending',
           lightColors: {
             main: '#ff4747',
             container: '#ff5757',
             onContainer: '#590009',
+          },
+        },
+        approved: {
+          colorName: 'approved',
+          lightColors: {
+            main: '#47ff47', // Vibrant green
+            container: '#57ff57', // Slightly lighter green
+            onContainer: '#005900', // Dark green for contrast
+          },
+        },
+        old: {
+          colorName: 'old',
+          lightColors: {
+            main: '#b0b0b0', // Neutral medium gray
+            container: '#d6d6d6', // Light gray for the container
+            onContainer: '#3a3a3a', // Dark gray for contrast
           },
         },
       },
@@ -187,7 +221,25 @@ const ReservationRequests: React.FC = () => {
       <div>
         {loading && <p>Loading...</p>}
         {error && <p className="text-red-500">{error}</p>}
-        {!loading && !error && <ScheduleXCalendar calendarApp={calendar} />}
+        {!loading && !error &&
+          <>
+            <div className='mt-5 mb-5'>
+              <AsyncSelect
+                label="Select a specific cat"
+                value={selectedCat?.id.toString() || ""}
+                onChange={handleCatChange}
+                size="lg"
+              >
+                {catList.map((cat) => (
+                  <Option key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </Option>
+                ))}
+              </AsyncSelect>
+            </div>
+            <ScheduleXCalendar calendarApp={calendar} />
+          </>
+        }
       </div>
       <Button color="blue" onClick={toggleModal} className="mt-8">
         Add Reservation Slot
@@ -218,7 +270,7 @@ const ReservationRequests: React.FC = () => {
           </Card>
         </Dialog>
       )}
-      <RequestTable />
+      <RequestTable onApprove={() => fetchSlots()}/>
     </div>
   );
 };

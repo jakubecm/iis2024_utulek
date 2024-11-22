@@ -44,6 +44,11 @@ export const SidebarProvider: React.FC<{ children: ReactNode }> = ({ children })
       route: '/volunteer/reservations',
     },
     {
+      label: 'Walk History',
+      icon: <InboxIcon className="h-5 w-5" />,
+      route: '/volunteer/walks',
+    },
+    {
       label: 'Settings',
       icon: <Cog6ToothIcon className="h-5 w-5" />,
       route: '/settings',

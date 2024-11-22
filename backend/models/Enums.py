@@ -25,3 +25,4 @@ class WalkRequestStatus(Enum):
     REJECTED = 2
     COMPLETED = 3
     IN_PROGRESS = 4
+    CANCELLED = 5
