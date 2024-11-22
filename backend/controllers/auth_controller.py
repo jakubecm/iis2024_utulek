@@ -1,7 +1,8 @@
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
+from psycopg2 import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
-from models.User import User
+from models.User import User, Volunteer
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies, jwt_required, get_jwt_identity, get_jwt
 from flasgger import swag_from
 from models.database import db
@@ -78,7 +79,19 @@ class Register(Resource):
             role = Roles.VOLUNTEER.value
         )
         db.session.add(new_user)
-        db.session.commit()
+        db.session.flush()
+
+        new_volunteer = Volunteer(
+            UserId = new_user.Id,
+            verified = False
+        )
+        db.session.add(new_volunteer)
+        
+        try:
+            db.session.commit()
+        except IntegrityError as e:
+            db.session.rollback()
+            return {"msg": "There has been an error creating the user."}, 409
 
         return {"msg": "User created successfully"}, 201
 
