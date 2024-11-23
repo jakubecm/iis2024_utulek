@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Input, Select, Option, Typography } from "@material-tailwind/react";
 import { User } from "./UserTable";
 import { API_URL } from "../App";
+import { Role } from "../auth/jwt";
 
 interface EditUserFormProps {
     user: User;
@@ -30,9 +31,9 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onModification }) => 
             LastName: lastName,
             Email: email,
             role: role,
-            Specialization: role === "2" ? specialization : undefined,
-            Telephone: role === "2" ? telephone : undefined,
-            verified: role === "1" ? verified : undefined,
+            Specialization: role === Role.VETS ? specialization : undefined,
+            Telephone: role === Role.VETS ? telephone : undefined,
+            verified: role === Role.VOLUNTEER ? verified : undefined,
         };
 
         console.log(userData);
@@ -98,11 +99,13 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onModification }) => 
                 required
                 size="lg"
             />
-            <Select label="Role" value={role} onChange={(value = "1") => setRole(value)} size="lg">
+            <Select label="Role" value={String(role)} onChange={(value = "1") => setRole(Number(value))} size="lg">
+                <Option value="0">Admin</Option>
                 <Option value="1">Volunteer</Option>
                 <Option value="2">Veterinarian</Option>
+                <Option value="3">Caregiver</Option>
             </Select>
-            {role === "2" && (
+            {role === Role.VETS && (
                 <>
                     <Input
                         label="Specialization"
@@ -120,7 +123,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ user, onModification }) => 
                     />
                 </>
             )}
-            {role === "1" && (
+            {role === Role.VOLUNTEER && (
                 <div className="flex items-center">
                     <input
                         type="checkbox"

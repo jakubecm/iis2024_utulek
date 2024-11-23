@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Button, Select, Option, Typography, Dialog, DialogBody } from "@material-tailwind/react";
+import { Button, Option, Typography, Dialog, DialogBody } from "@material-tailwind/react";
 import { API_URL } from "../App";
 import HealthRecordsTable from "./HealthRecordsTable";
 import AddHealthRecordForm from "./AddHealthRecordForm";

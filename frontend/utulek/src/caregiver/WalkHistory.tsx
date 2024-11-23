@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { ReservationRequest } from './ReservationRequests';
 import { API_URL } from '../App';
 import { Status } from '../types';
 import WalkHistoryTable, { Request } from './WalkHistoryTable';

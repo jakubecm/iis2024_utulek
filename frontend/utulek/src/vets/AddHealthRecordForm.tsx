@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input, Textarea, Typography, Select, Option } from "@material-tailwind/react";
+import { Button, Input, Textarea, Typography, Option } from "@material-tailwind/react";
 import { API_URL } from "../App";
 import AsyncSelect from '../components/AsyncSelect';
 
@@ -67,7 +67,7 @@ const AddHealthRecordForm: React.FC<AddHealthRecordFormProps> = ({ onSubmit, onC
         onSubmit(); // Notify the parent component to refresh
         onClose();  // Close the form
 
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
         setError(err.message || "Failed to add health record");
 

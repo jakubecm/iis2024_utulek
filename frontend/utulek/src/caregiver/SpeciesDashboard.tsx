@@ -5,11 +5,16 @@ import AddSpeciesForm from './AddSpeciesForm';
 import EditSpeciesForm from './EditSpeciesForm';
 import { API_URL } from '../App';
 
+interface Species {
+    id: number;
+    name: string;
+}
+
 const SpeciesDashboard: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [speciesList, setSpeciesList] = useState([]);
-    const [selectedSpecies, setSelectedSpecies] = useState(null);
+    const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
 
     const fetchSpecies = async () => {
         try {
@@ -35,7 +40,7 @@ const SpeciesDashboard: React.FC = () => {
         fetchSpecies();
     };
 
-    const openEditModal = (species) => {
+    const openEditModal = (species: Species) => {
         setSelectedSpecies(species);
         setIsEditOpen(true);
     };

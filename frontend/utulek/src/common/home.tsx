@@ -15,7 +15,7 @@ const CatList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCat, setSelectedCat] = useState<Cat | null>(null);
   const [photoIndices, setPhotoIndices] = useState<{ [key: number]: number }>({});
-  const { isAuthenticated, role } = useAuth();
+  const { role } = useAuth();
   const [species, setSpecies] = useState<{ [key: number]: string }>({});
   const navigate = useNavigate();
   const [isDefaultImageAvailable, setIsDefaultImageAvailable] = useState(true);
@@ -64,16 +64,16 @@ const CatList: React.FC = () => {
       .catch((error) => console.error("Error fetching species:", error));
   }, []);
 
-  const handleCatAdded = (newCat: Cat) => {
+  const handleCatAdded = () => {
     fetchCats();
     setIsModalOpen(false);
   };
 
-  const handleCatDeleted = (deletedCatId: number) => {
+  const handleCatDeleted = () => {
     fetchCats();
   };
 
-  const handleCatUpdated = (updatedCat: Cat) => {
+  const handleCatUpdated = () => {
     fetchCats();
     setSelectedCat(null);
   };

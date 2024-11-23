@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, Input, Typography } from "@material-tailwind/react";
 import { API_URL } from "../App";
 import { useNavigate } from "react-router-dom";

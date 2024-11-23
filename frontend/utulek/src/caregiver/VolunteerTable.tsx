@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Card, Typography } from '@material-tailwind/react';
 
-interface Volunteer {
+export interface Volunteer {
     Id: number;
     Username: string;
     FirstName: string;

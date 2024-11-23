@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { API_URL } from '../App';
 import { Role } from '../auth/jwt';
-import VolunteerTable from './VolunteerTable';
+import VolunteerTable, { Volunteer } from './VolunteerTable';
 
 const VolunteerDashboard: React.FC = () => {
     const [volunteerList, setVolunteerList] = useState([]);
@@ -28,7 +28,7 @@ const VolunteerDashboard: React.FC = () => {
         }
     };
 
-    const handleValidate = async (volunteer) => {
+    const handleValidate = async (volunteer: Volunteer) => {
 
         // Prepare updated user data
         const userData = {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input, Textarea, Typography, Select, Option } from "@material-tailwind/react";
+import { Button, Input, Textarea, Typography, Option } from "@material-tailwind/react";
 import { API_URL } from "../App";
 import { HealthRecord } from "../types";
 import AsyncSelect from '../components/AsyncSelect';

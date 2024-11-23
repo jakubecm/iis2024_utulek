@@ -5,7 +5,7 @@ import { API_URL } from "../App";
 import AsyncSelect from './AsyncSelect';
 
 interface AddCatFormProps {
-  onCatAdded: (cat: { id: number; name: string; species_id: number; age: number; description: string; found: string }) => void;
+  onCatAdded: () => void;
 }
 
 const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
@@ -107,7 +107,7 @@ const AddCatForm: React.FC<AddCatFormProps> = ({ onCatAdded }) => {
       if (!catResponse.ok) throw new Error("Failed to add cat");
   
       const newCat = await catResponse.json();
-      onCatAdded(newCat);
+      onCatAdded();
   
       // Upload the photo if available
       if (file && newCat.id) {
