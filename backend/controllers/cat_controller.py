@@ -6,6 +6,7 @@ from models.Cat import Cats
 from models.database import db
 from models.Cat import CatPhotos
 from models.Enums import Roles
+from datetime import datetime
 
 # Parser for Cat endpoints
 cat_parser = reqparse.RequestParser()
@@ -105,6 +106,12 @@ class CatList(Resource):
             return {"msg": "Admin or Caretaker access required"}, 401
         
         args = cat_parser.parse_args()
+
+        try:
+            valid_date = datetime.strptime(args['found'], '%m-%d-%Y')
+        except ValueError:
+            return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
+        
         new_cat = Cats(
             Name=args['name'],
             SpeciesId=args['species_id'],
@@ -235,6 +242,11 @@ class CatById(Resource):
             return {"msg": "Cat not found"}, 404
 
         args = cat_parser.parse_args()
+        try:
+            valid_date = datetime.strptime(args['found'], '%m-%d-%Y')
+        except ValueError:
+            return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
+        
         cat.Name = args['name']
         cat.SpeciesId = args['species_id']
         cat.Age = args.get('age')

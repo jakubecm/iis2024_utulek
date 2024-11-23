@@ -6,6 +6,7 @@ from models.Enums import Roles
 from models.HealthRecord import HealthRecord
 from models.database import db
 from models.User import User
+from datetime import datetime
 
 health_record_parser = reqparse.RequestParser()
 health_record_parser.add_argument('date', type=str, required=True, help="Date cannot be blank.")
@@ -135,6 +136,11 @@ class HealthRecordList(Resource):
             return {"msg": "Unauthorized user"}, 401
         
         args = health_record_parser.parse_args()
+
+        try:
+            valid_date = datetime.strptime(args['date'], '%m-%d-%Y')
+        except ValueError:
+            return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
 
         new_health_record = HealthRecord(
             CatId = cat_id,
@@ -271,6 +277,11 @@ class HealthRecordById(Resource):
         
         args = health_record_parser.parse_args()
         data = request.get_json()
+
+        try:
+            valid_date = datetime.strptime(args['date'], '%m-%d-%Y')
+        except ValueError:
+            return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
 
         health_record = HealthRecord.query.filter_by(Id=health_record_id).first()
         if health_record:
