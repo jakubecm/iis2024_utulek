@@ -52,13 +52,13 @@ function App() {
                 <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
                   <Route path="/caregiver/volunteer_validation" element={<VolunteerDashboard />} />
                 </Route>
-                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.VOLUNTEER]} />}>
+                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.VERIFIED_VOLUNTEER]} />}>
                   <Route path="/volunteer/reservations" element={<WalkReservations />} />
                 </Route>
                 <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
                   <Route path="/caregiver/walks" element={<WalkHistory />} />
                 </Route>
-                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.CAREGIVER]} />}>
+                <Route element={<ProtectedRoute requiredRoles={[Role.ADMIN, Role.VERIFIED_VOLUNTEER]} />}>
                   <Route path="/volunteer/walks" element={<WalkHistoryVolunteer />} />
                 </Route>
               </Routes>

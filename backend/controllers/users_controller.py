@@ -294,6 +294,10 @@ class UserList(Resource):
             Hashed_pass=hashed_password,
             role=args['role']
         )
+
+        if args['verified'] is True:
+            new_user.role = Roles.VERIFIED_VOLUNTEER.value
+            
         db.session.add(new_user)
         db.session.flush()  # Flush to get the user ID for foreign key references
 

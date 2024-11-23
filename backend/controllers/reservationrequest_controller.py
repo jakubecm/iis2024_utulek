@@ -15,7 +15,7 @@ parser.add_argument('SlotId', type=int, required=True)
 parser.add_argument('VolunteerId', type=int, required=True)
 parser.add_argument('RequestDate', type=str, required=True)
 
-allowed_roles = [Roles.ADMIN.value, Roles.VERIFIED_VOLUNTEER.value]
+allowed_roles = [Roles.ADMIN.value, Roles.VERIFIED_VOLUNTEER.value, Roles.CAREGIVER.value]
 
 class ReservationList(Resource):
     @swag_from({
@@ -108,6 +108,11 @@ class ReservationList(Resource):
             return {"msg": "Unauthorized access"}, 401
         
         args = parser.parse_args()
+        # Check whether a reservation for the same slot and volunteer already exists
+        existing_reservation = ReservationRequest.query.filter_by(SlotId=args['SlotId'], VolunteerId=args['VolunteerId']).first()
+        if existing_reservation is not None:
+            return {"msg": "Reservation request already exists"}, 400
+        
         new_reservation_request = ReservationRequest(
             SlotId=args['SlotId'],
             VolunteerId=args['VolunteerId'],
@@ -293,7 +298,7 @@ class ReservationById(Resource):
     @jwt_required()
     def put(self, reservation_request_id):
         current_user = get_jwt_identity()
-        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value]:
+        if current_user['role'] not in [Roles.ADMIN.value, Roles.CAREGIVER.value, Roles.VERIFIED_VOLUNTEER.value]:
             return {"msg": "Unauthorized access"}, 401
         # parse only the Status field
         put_parser = reqparse.RequestParser()
