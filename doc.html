@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0064)https://www.fit.vut.cz/study/course/IIS/private/projekt/doc.html -->
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+	<title>Projekt IIS</title>
+	<style type="text/css">
+		table {
+			border-collapse: collapse;
+		}
+
+		td,
+		th {
+			border: 1px solid black;
+			padding: 0.3em 0.5em;
+			text-align: left;
+		}
+
+		dt {
+			font-weight: bold;
+			margin-top: 0.5em;
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu 
+	 podle použitého editoru -->
+
+	<h1>Zvířecí Útulek</h1> <!-- Nahraďte názvem svého zadání -->
+
+	<dl>
+		<dt>Autoři</dt>
+		<dd>Milan Jakubec <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+			<a href="mailto:xjakub41@stud.fit.vutbr.cz">xjakub41@stud.fit.vutbr.cz</a> -
+			vedoucí týmu, architektura systému, návrh a implementace databáze, návrh a implementace REST API, API
+			dokumentace přes swagger, výpomoc s implementací frontendu, nasazení aplikace na produkci (konfig VPS aj.)
+		</dd>
+		<dd>Jakub Ráček <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+			<a href="mailto:xracek12@stud.fit.vutbr.cz">xracek12@stud.fit.vutbr.cz</a> -
+			Primárně implementace klíčových částí frontendu a design, zajištění funkční autentizace přes JWT, výpomoc s
+			implementací backendu, bug fixing
+		</dd>
+		<dd>Norman Babiak <!-- Nahraďte skutečným jménem a e-mailem autora a popisem činnosti -->
+			<a href="mailto:xbabia01@stud.fit.vutbr.cz">xbabia01@stud.fit.vutbr.cz</a> -
+			Fullstack činnost - implementace velkého množství endpointů a jejich frontendových protikusů, práce s
+			fotkami kočiček
+		</dd>
+		<dt>URL aplikace</dt>
+		<dd><a href="https://iis.milanjakubec.cz/">https://iis.milanjakubec.cz/</a></dd>
+		<dd>(pokud má aplikace více vstupních stránek, napište obdobně další URL)</dd>
+	</dl>
+
+	<h2>Uživatelé systému pro testování</h2>
+	<p>Uveďte prosím existující zástupce <strong>všech rolí uživatelů</strong>.</p>
+	<table>
+		<tbody>
+			<tr>
+				<th>Login</th>
+				<th>Heslo</th>
+				<th>Role</th>
+			</tr>
+			<tr>
+				<td>admin</td>
+				<td>Koteseni</td>
+				<td>Administrátor</td>
+			</tr>
+			<tr>
+				<td>john</td>
+				<td>doktor</td>
+				<td>Veterinář</td>
+			</tr>
+			<tr>
+				<td>vlad</td>
+				<td>caregiver</td>
+				<td>Pečovatel</td>
+			</tr>
+			<tr>
+				<td>volun1</td>
+				<td>volun</td>
+				<td>Dobrovolník (neverifikovaný)</td>
+			</tr>
+			<tr>
+				<td>volun2</td>
+				<td>volun2</td>
+				<td>Dobrovolník (verifikovaný)</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<p>(Diagram případů užití není nutné vkládat, pokud IS implementuje role a případy užití definované zadáním.)</p>
+
+	<h3>Video</h3>
+
+	<p>Přiložte odkaz na komentované video demonstrující použití informačního systému. Zaměřte se na případy užití
+		definované zadáním (např. registrace uživatele, správa uživatelů a činnosti jednotlivých rolí). Video nahrajte
+		například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p>
+
+	Video zde: <a href="https://www.youtube.com/watch?v=1vpT6h96I-A"
+		target="_blank">https://www.youtube.com/watch?v=1vpT6h96I-A</a>
+
+	<h2>Implementace</h2>
+	<p>Stručná dokumentace k implementaci, která popisuje, které části projektu (např. PHP skripty) implementují
+		jednotlivé případy použití.</p>
+
+	<h3>Komentář autorů</h3>
+	<p>
+		Je poměrně složité popisovat, které části projektu implementují jednotlivé případy použití.
+		Projekt je implementován v Pythonu s využitím frameworku Flash pro vytvoření REST API na backendu,
+		na frontendu je využit React framework pro vytvoření klientské části aplikace.<br><br>
+
+		Backend je implementován MVC architekturou, obsahuje tedy složku s modely a složku s controllery.
+		Každý controller obsahuje CRUD metody pro jednotlivé případy použití, které jsou volány z frontendu pomocí AJAX
+		requestů.<br><br>
+
+		Pro autentizaci existuje auth_controller.py, k němuž existuje model User.py, tato kombinace zajišťuje
+		přihlašování, registraci aj.<br>
+		Pro správu uživatelů z hlediska admina existuje users_controller.py, který ji v kombinaci s modelem User.py
+		zajišťuje.<br>
+		Pro správu koček existuje cats_controller.py, který v kombinaci s modelem Cat.py zajišťuje CRUD operace pro
+		kočky.<br>
+		Máme i species_controller.py, který využívá třídá Species z Cat modelu a ten zajišťuje CRUD operace pro plemena
+		koček.<br>
+		Kočičky můžou mít i svoje fotky, pro práci s fotkami máme cat_photo_controller.py, který využívá model CatPhotos
+		ze souboru Cat.py<br>
+		Pro vytvoření nových slotů pro rezervaci máme availableslot_controller.py s modelem AvailableSlot.py.<br>
+		Pro rezervace samotné máme reservation_controller.py s modelem ReservationRequest.py.<br>
+		Pro zdravotní záznamy koček máme healthrecord_controller.py s modelem HealthRecord.py.<br>
+		Pro žádost o vyšetření kočičky slouží examinationrequest_controller.py s modelem ExaminationRequest.py.<br><br>
+		Tím, že všechny controllery zajišťují CRUD operace se nedá moc říci, že by se nějakým extrémním způsobem lišily.
+		Vždy se liší pouze v prací s modely.<br><br>
+
+		Frontend potom lze nalézt ve složce frontend/utulek, kde je vytvořen React projekt. Ten obsahuje složku src, kde
+		jsou jednotlivé komponenty pro jednotlivé situace. Ve složce admin se nachází komponenty pro administrátora, tj.
+		tabulka s uživateli, dashboard, formuláře atp.
+		Ve složce auth se nacházi implementace práce s JWT tokeny a definované uživatelksé role. Ve složce caregiver se
+		nachází komponenty pro pečovatele a obdobně u dalších.
+		Složka common obsahuje obrazovku přihlášení, homepage a věci pro navigační menu. Ve složce vets se nachází
+		komponenty pro veterináře a ve složce volunteer pro dobrovolníky.<br>
+		Zacházet do velkých detailů vzhledem k tomu, že dokumentace má být stručná, nechceme, nicméně většinou
+		komponenty fungují tak,
+		že jsou implementované nějake states a nějaké React hooky, které pomocí fetch requestů volají API na backendu, a
+		potom ta data
+		dále nějak zpracovávájí a zobrazují.
+	</p>
+
+	<h3>Databáze</h3>
+
+	<img src="database.jpeg" alt="Databáze" style="width: 50%;">
+
+	<h2>Instalace</h2>
+
+	Stručně popište:
+	<ul>
+		<li>postup instalace na server,</li>
+		<li>softwarové požadavky (verze PHP apod.),</li>
+		<li>jak rozbalit, konfigurovat, inicializovat databázi, ...</li>
+	</ul>
+
+	<h3>Komentář autorů</h3>
+
+	<p>Doporučujeme začít s rozjetím databáze. Tento systém využívá PostgreSQL, je tedy třeba jej nainstalovat. Na verzi
+		by
+		nemělo záležet, doporučujeme nicméně minimálně verzi 13 a novější.
+		Ke správě DB doporučujeme použít pgAdmin software.
+		V pgAdminovi je nutné v sekci Login/Roles přidat nového uživatele "utulekAdmin" s heslem "smisek123", následně
+		klikněte pravým tlačítkem na Databases, Create database, databázi pojmenujte utulek,
+		jako ownera nastavte uživatele "utulekAdmin" a klikněte na Save. Poté klikněte pravým tlačítkem na nově
+		vytvořenou
+		databázi, a vyberte Query Tool. Do něj vložte obsah CreateDb.sql ze složky backend a spusťte. Tímto se vytvoří
+		databáze, která je připravena.</p>
+
+	<p>Pro rozchození backendu je nutné mít nainstalovaný Python, ideálně ve verzi 3.11 a novější. K němu je vhodné
+		nainstalovat modul venv.
+		Následně ve složce backend pomocí příkazu "python -m venv venv" vytvoříte virtuální prostředí, které aktivujete
+		buďto pomocí "venv\Scripts\activate" (Windows) nebo "source venv/bin/activate" (Linux).
+		Následně je nutné nainstalovat potřebné moduly pomocí "pip install -r requirements.txt".<br>
+		Může se stát, že vám instalace zahlásí chybu kvůli knihovně psycopg2, v takovém případě je pravděpodobně nutné
+		nainstalovat
+		python3-dev, případně libpq-dev balíčky s python development headery. V případě, že by se ani tak psycopg2
+		nedařilo
+		nainstalovat,
+		je možné použít alternativu psycopg2-binary pomocí "pip install psycopg2-binary". Tímto by měl být backend
+		připraven
+		k běhu.
+		V kódu není nutné nic konfigurovat, uživatel a heslo pro připojení k databázi je již nastaveno na "utulekAdmin"
+		a
+		"smisek123".</p>
+
+	Backend je možné spustit pomocí "flask run", pokud to by nefungovalo, možným řešením je nastavit makro FLASK_APP na
+	App.py pomocí "set FLASK_APP=App.py" (Windows) nebo "export FLASK_APP=App.py" (Linux). Alternativně je možné spustit
+	pomocí "python -m flask run". Backend by defaultně měl běžet na localhostu na portu 5000.
+
+	Frontend klienta je možné rozjet ze složky frontend/utulek pomocí "npm install" a následně "npm run dev". Je nutné
+	mít nainstalovaný Node.js,
+	ideálně ve verzi 16 a novější.
+
+	Pakliže chcete do databáze administrátorský přístup, bude nutné jej do DB vložit buďto pomocí vlastního skriptu, kde
+	uživateli
+	nastavíte implicitně roli 0,
+	případně pomocí klasické registace uživatele a následnou manuální změnou jeho role na hodnotu 0 v databázi. Pozor:
+	je nutné zároveň z tabulky
+	volunteers smazat záznam tohoto uživatele, neboť při registraci je implicitně uživatel považován za dobrovolníka.
+	Seeding script nebyl v zadání definovaný, nepovažovali jsme jej tedy za vyžádaný a nebyl vytvořen.<br><br>
+
+	Co se týče nasazení na produkci, běží systém na pronajaté VPS s Ubuntu Server 22. Na VPS je v docker kontejneru
+	běžící
+	nginx server, který přesměrovává requesty na backend a frontend. Backend a frontend jsou spuštěny pomocí screen
+	utility
+	a běží nepřetržitě.
+
+
+
+	<h2>Známé problémy</h2>
+	<p>Žádné, implementovány byly všechny části projektu, ačkoliv evidence vypůjčení a vrácení zvířete bylo mírně
+		přizpůsobeno implementaci
+		namísto tvorby nové tabulky.</p>
+	<p>V případě, že by nefungoval hosting na doméně iis.milanjakubec.cz (znamenalo by to problém s VPS, který dle SLA
+		teoreticky může, ač nepravděpodobně, nastat), zavolejte či napište prosím
+		na číslo +420 778 038 949 a pokusíme se zjednat okamžitou nápravu. K takovému výpadku by nicméně nemělo dojít.
+	</p>
+
+</body>
+
+</html>
