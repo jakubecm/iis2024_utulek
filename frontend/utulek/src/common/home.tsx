@@ -116,21 +116,24 @@ const CatList: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center my-8">
-        <Typography variant="h1" className="text-center mb-8">
-          Welcome to Rizztulek – A Home for Cats in Need
-        </Typography>
-        <Typography variant="lead" className="max-w-[70%]">
-          At Rizztulek, we are dedicated to providing love, care, and second chances to cats in need. Whether you're here to adopt a furry friend, learn about our shelter, or support our mission, you're in the right place.
-          <br /><br />
-          Explore our site to meet our adorable residents, and discover ways to get involved. Together, we can create a brighter future for every whiskered soul.
-          <br /><br />
-          Thank you for visiting Rizztulek – where every cat's story deserves a happy ending!
-        </Typography>
-      </div>
+      { role === Role.UNAUTHORIZED && (
+          <div className="flex flex-col items-center my-8">
+            <Typography variant="h1" className="text-center mb-8">
+              Welcome to Rizztulek – A Home for Cats in Need
+            </Typography>
+            <Typography variant="lead" className="max-w-[70%]">
+              At Rizztulek, we are dedicated to providing love, care, and second chances to cats in need. Whether you're here to adopt a furry friend, learn about our shelter, or support our mission, you're in the right place.
+              <br /><br />
+              Explore our site to meet our adorable residents, and discover ways to get involved. Together, we can create a brighter future for every whiskered soul.
+              <br /><br />
+              Thank you for visiting Rizztulek – where every cat's story deserves a happy ending!
+            </Typography>
+          </div>
+        )
+      }
       <div className="flex flex-col items-center min-h-screen bg-gray-100 py-6">
         <Typography variant="h3" color="blue-gray" className="mb-8 text-center">
-          Available Cats
+          Our Cats
         </Typography>
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {cats.map((cat) => {
