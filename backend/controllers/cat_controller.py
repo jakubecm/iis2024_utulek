@@ -108,7 +108,7 @@ class CatList(Resource):
         args = cat_parser.parse_args()
 
         try:
-            valid_date = datetime.strptime(args['found'], '%m-%d-%Y')
+            valid_date = datetime.strptime(args['found'], '%Y-%m-%d')
         except ValueError:
             return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
         
@@ -243,7 +243,7 @@ class CatById(Resource):
 
         args = cat_parser.parse_args()
         try:
-            valid_date = datetime.strptime(args['found'], '%m-%d-%Y')
+            valid_date = datetime.strptime(args['found'], '%Y-%m-%d')
         except ValueError:
             return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
         
