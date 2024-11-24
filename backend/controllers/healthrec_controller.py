@@ -138,7 +138,7 @@ class HealthRecordList(Resource):
         args = health_record_parser.parse_args()
 
         try:
-            valid_date = datetime.strptime(args['date'], '%m-%d-%Y')
+            valid_date = datetime.strptime(args['date'], '%Y-%m-%d')
         except ValueError:
             return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
 
@@ -279,7 +279,7 @@ class HealthRecordById(Resource):
         data = request.get_json()
 
         try:
-            valid_date = datetime.strptime(args['date'], '%m-%d-%Y')
+            valid_date = datetime.strptime(args['date'], '%Y-%m-%d')
         except ValueError:
             return {"msg": "Invalid date format. Use MM-DD-YYYY."}, 400
 
